@@ -52,12 +52,13 @@ export class CameraRig {
       D = Math.min(D, camMax);
       // keep lifted / juggled fighters in frame: pull back and tilt up when someone is high above the floor
       const topOf = (f) => f.y + (f.state === ST.GRAB ? (f.capY || 0) : 0) + 1.7 * f.sc;
-      const lift = clamp((Math.max(topOf(a), topOf(b)) - 2.3) / 2.2, 0, 1);
-      D = Math.min(D + lift * 1.5, camMax);
-      let H = 1.38 + clamp(sep * 0.05, 0, 0.45) + lift * 0.45;
+      const lift = clamp((Math.max(topOf(a), topOf(b)) - 2.2) / 1.8, 0, 1);
+      D = Math.min(D + lift * 2.2, camMax);
+      let H = 1.38 + clamp(sep * 0.05, 0, 0.45) + lift * 0.6;
       wantPos.set(mx + nx * D, H, mz + nz * D);
-      wantLook.set(mx, 1.12 + lift * 0.85, mz);
+      wantLook.set(mx, 1.12 + lift * 1.2, mz);
       wantFov = 38;
+      if (lift > 0.05) rate = Math.max(rate, 0.1 + lift * 0.22);
       // intro sweep
       if (match.phase === 'intro') {
         const t = match.phaseT / match.introLen;
@@ -104,12 +105,13 @@ export class CameraRig {
         const cx = (att.x + def.x) / 2, cz = (att.z + def.z) / 2;
         const shot = idx % 4;
         const last = idx >= hits.length;
+        const kb = Math.max(att.sc, def.sc) >= 1.1 ? Math.max(att.sc, def.sc) * 1.3 : 1;   // big fighters need the camera further away
         const s = (this.cineT = this.cineT + dtF);
-        if (last) { wantPos.set(cx + px * 5.0 - dx * 1.0, 1.7, cz + pz * 5.0 - dz * 1.0); wantLook.set(cx, 1.1, cz); wantFov = 40; }
-        else if (shot === 0) { wantPos.set(cx + px * 2.8 - dx * 0.4, 1.25, cz + pz * 2.8 - dz * 0.4); wantLook.set(cx, 1.15, cz); wantFov = 31; }
-        else if (shot === 1) { wantPos.set(att.x - dx * 1.3 + px * 0.9, 1.75, att.z - dz * 1.3 + pz * 0.9); wantLook.set(def.x, 1.2, def.z); wantFov = 40; }
-        else if (shot === 2) { wantPos.set(cx - px * 2.2 + dx * 0.3, 0.55, cz - pz * 2.2 + dz * 0.3); wantLook.set(cx, 1.35, cz); wantFov = 36; }
-        else { wantPos.set(def.x + dx * 1.4 + px * 1.2, 1.5, def.z + dz * 1.4 + pz * 1.2); wantLook.set(att.x, 1.2, att.z); wantFov = 38; }
+        if (last) { wantPos.set(cx + px * 5.0 * kb - dx * 1.0, 1.7, cz + pz * 5.0 * kb - dz * 1.0); wantLook.set(cx, 1.1, cz); wantFov = 40; }
+        else if (shot === 0) { wantPos.set(cx + px * 2.8 * kb - dx * 0.4, 1.25 * Math.sqrt(kb), cz + pz * 2.8 * kb - dz * 0.4); wantLook.set(cx, 1.15, cz); wantFov = 31; }
+        else if (shot === 1) { wantPos.set(att.x - dx * 1.3 * kb + px * 0.9 * kb, 1.75 * Math.sqrt(kb), att.z - dz * 1.3 * kb + pz * 0.9 * kb); wantLook.set(def.x, 1.2, def.z); wantFov = 40; }
+        else if (shot === 2) { wantPos.set(cx - px * 2.2 * kb + dx * 0.3, 0.55, cz - pz * 2.2 * kb + dz * 0.3); wantLook.set(cx, 1.35, cz); wantFov = 36; }
+        else { wantPos.set(def.x + dx * 1.4 * kb + px * 1.2 * kb, 1.5 * Math.sqrt(kb), def.z + dz * 1.4 * kb + pz * 1.2 * kb); wantLook.set(att.x, 1.2, att.z); wantFov = 38; }
         rate = 0.45;
         void t;
       } else this.cineT = 0;
