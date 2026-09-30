@@ -261,7 +261,7 @@ export function results(app, res, cfg) {
   const wn = w >= 0 ? res.names[w] : tr('DRAW', 'เสมอ');
   const q = w >= 0 ? QUOTES[res.ids[w]] : null;
   const quote = q ? q[(Math.random() * q.length) | 0] : null;
-  const stat = (k, en, th, fmt = (v) => v) => h('tr', {}, h('td', {}, fmt(res.stats[0][k])), h('td', {}, tr(en, th)), h('td', {}, fmt(res.stats[1][k])));
+  const stat = (k, en, th, fmt = (v) => v) => { const a = res.stats[0][k], b = res.stats[1][k]; return h('tr', {}, h('td', { class: a > b ? 'lead' : '' }, fmt(a)), h('td', {}, tr(en, th)), h('td', { class: b > a ? 'lead' : '' }, fmt(b))); };
   audio.playTrack('results');
   const rk = rankOf(save.profile.exp);
   const acts = [];
@@ -272,7 +272,7 @@ export function results(app, res, cfg) {
       quote ? h('div', { class: 'res-quote' }, `"${tr(quote[0], quote[1])}"`) : null,
       h('table', { class: 'res-table' },
         h('tr', {}, h('th', {}, res.names[0]), h('th', {}, ''), h('th', {}, res.names[1])),
-        h('tr', {}, h('td', {}, res.wins[0]), h('td', {}, tr('Rounds won', 'รอบที่ชนะ')), h('td', {}, res.wins[1])),
+        h('tr', {}, h('td', { class: res.wins[0] > res.wins[1] ? 'lead' : '' }, res.wins[0]), h('td', {}, tr('Rounds won', 'รอบที่ชนะ')), h('td', { class: res.wins[1] > res.wins[0] ? 'lead' : '' }, res.wins[1])),
         stat('dmg', 'Damage dealt', 'ดาเมจที่ทำได้'), stat('maxCombo', 'Max combo', 'คอมโบสูงสุด'), stat('counters', 'Counter hits', 'ตีสวน'), stat('punishes', 'Punishes', 'ลงโทษ'),
         stat('throws', 'Throws', 'จับทุ่ม'), stat('walls', 'Wall splats', 'ติดกำแพง'), stat('heats', 'Heat used', 'ใช้ Heat'), stat('rages', 'Rage Arts', 'Rage Art')),
       res.fm ? h('div', { class: 'reward' }, `+${res.fm} FM  ·  +${res.exp} EXP  ·  ${tr('Rank', 'แรงก์')}: ${tr(rk.en, rk.th)}`) : null,

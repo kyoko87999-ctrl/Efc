@@ -198,6 +198,7 @@ export class App {
     requestAnimationFrame(this.frame);
     const dt = Math.min(0.1, (now - this.last) / 1000);
     this.last = now;
+    if (this.frozen) { input.endFrame(); return; }
     this.T += dt;
     // navigation
     const evs = input.navPoll();
@@ -212,7 +213,7 @@ export class App {
     this.ui.update(dt);
     let alpha = 0, ts = 1;
     if (this.match) {
-      if (!this.paused && !this.modal) {
+      if (!this.paused && !this.modal && !this.frozen) {
         const r = this.updateMatch(dt);
         alpha = r.alpha; ts = r.ts;
       } else alpha = 0;
@@ -268,6 +269,22 @@ export class App {
     }
     if (this.acc > 0.2) this.acc = 0.2;
     return { alpha: Math.min(1, this.acc * 60), ts: m.timeScale };
+  }
+
+  // deterministic stepping for automated visual checks (tools/play.mjs): freeze real time, advance n sim frames
+  debugStep(n, r0, r1, every = 4) {
+    const m = this.match;
+    if (!m) return;
+    this.frozen = true;
+    let dtAcc = 0;
+    for (let i = 0; i < n; i++) {
+      const raws = this.cfg.replay ? this.inputsFor(m) : [r0 ? { ...NEUTRAL, ...r0 } : (this.brains[0] ? this.brains[0].think(m) : NEUTRAL), r1 ? { ...NEUTRAL, ...r1 } : (this.brains[1] ? this.brains[1].think(m) : NEUTRAL)];
+      m.step(raws);
+      this.drainEvents();
+      if (this.match !== m) return;
+      dtAcc += (1 / 60) / Math.max(0.05, m.timeScale);
+      if (i % every === every - 1 || i === n - 1) { this.hud.update(dtAcc * 60, {}); this.gv.frame(dtAcc, 1, m.timeScale); dtAcc = 0; }
+    }
   }
 
   drainEvents() {
@@ -410,6 +427,7 @@ export class App {
     if (!this.match) return;
     this.gv.unloadMatch();
     this.hud.clear();
+    this.frozen = false;
     this.match = null; this.cfg = null; this.tut = null; this.practiceRec = null;
     this.paused = false;
     this.brains = [null, null];

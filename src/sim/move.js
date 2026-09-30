@@ -40,7 +40,7 @@ export function compileMove(d) {
   m.chAdv = m.ch ?? m.hit + 3;
   m.chStun = stun(m.chAdv);
   if (m.cf === null) m.cf = m.st + m.ac;
-  if (m.cw === null) m.cw = Math.max(1, m.st - 4);
+  if (m.cw === null) m.cw = 1;          // follow-up presses are buffered from the start of the move
   if (m.cwe === null) m.cwe = m.cf + 4;
   m.pushV = m.push * 0.18;
   m.pushBV = m.pushB * 0.18;

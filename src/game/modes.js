@@ -109,7 +109,7 @@ export function story(app) {
   const el = h('div', { class: 'screen menu-screen veil' }, h('h1', { class: 'title' }, tr(STORY.title, STORY.titleTH)), h('h2', { class: 'sub' }, tr('Story Mode', 'โหมดเนื้อเรื่อง')), list.el);
   app.ui.clear();
   app.ui.push({ el, nav: (ev) => list.nav(ev), back: back(app) });
-  app.setShowcase([{ id: 'tawan', x: -1.9 }, { id: 'asura', x: 1.9 }], { stage: 'ring', cam: [0, 1.5, 7.4], look: [0, 1.1, 0], fov: 34 });
+  app.setShowcase([{ id: 'tawan', x: -1.9 }, { id: 'asura', x: 1.9 }], { stage: 'ring', cam: [0, 1.35, 5.7], look: [0, 1.05, 0], fov: 38 });
   app.showcasePose(0, 'intro'); app.showcasePose(1, 'intro');
 
   function begin(i, withPrologue) {

@@ -4,7 +4,7 @@ import { buildMoves, PRE, mv, rageArt, heatSmash, rageDrive, THR } from '../lib.
 const k343 = mv('k343', null, 'Triple Kick', 'h', 7, 3, 26, 15, -11, 0, 'kickhiR', { ht: 'stag', push: 0.7 });
 const df34 = mv('df34', null, 'Stab-Roundhouse', 'm', 8, 3, 24, 13, -12, 0, 'midround', { ht: 'stag' });
 const moves = buildMoves(
-  { dmg: 1.0, spd: -1, reach: 1.06 },
+  { dmg: 1.07, spd: -1, reach: 1.06 },
   {
     j1: { dmg: 5 }, j2: { dmg: 7 }, j123: { name: 'Punch-Punch-Kick', dmg: 13 },
     k3: { name: 'Snap Kick', st: 11, dmg: 8, blk: -3, hit: 5, next: { 4: 'k34' } },

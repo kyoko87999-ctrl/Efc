@@ -2,7 +2,7 @@ import { buildMoves, PRE, mv, rageArt, heatSmash, rageDrive, THR } from '../lib.
 
 // Asura - the Demon Lord: long-range beam, blink, wings
 const moves = buildMoves(
-  { dmg: 1.1, spd: 0, reach: 1.05 },
+  { dmg: 1.02, spd: 0, reach: 1.05 },
   {
     j1: { name: 'Claw Jab', dmg: 7 }, j2: { name: 'Claw Cross', dmg: 10 }, j123: { name: 'Claw Combo', dmg: 15 },
     f2: { name: 'Demon Claw', ...PRE.cross, lv: 'm', st: 14, ac: 3, rec: 22, dmg: 18, blk: -10, hit: 4, he: true, cht: 'launch', ws: true, wsDmg: 10, wb: true, ht: 'stag', push: 0.8, mv: [[3, 12, 0.3]] },

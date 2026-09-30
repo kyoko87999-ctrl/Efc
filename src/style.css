@@ -207,9 +207,12 @@ h2.sub { margin: 0; font-size: 1.15em; font-weight: 500; opacity: .75; letter-sp
 .res-card { width: min(70vw, 900px); padding: 1.4em 1.8em; background: var(--panel); border: 1px solid var(--line); border-top: .3em solid var(--gold); }
 .res-title { font-size: 4vh; font-weight: 800; font-style: italic; text-transform: uppercase; color: var(--gold); text-shadow: 0 .06em 0 #000; }
 .res-quote { opacity: .85; font-style: italic; margin: .4em 0 1em; }
-.res-table { width: 100%; border-collapse: collapse; font-size: .95em; }
-.res-table td { padding: .28em .6em; border-bottom: 1px solid var(--line); } .res-table td:nth-child(2) { text-align: center; font-weight: 700; color: var(--gold); } .res-table td:nth-child(1), .res-table td:nth-child(3) { width: 30%; }
-.res-table th { text-align: center; opacity: .7; font-weight: 600; letter-spacing: .1em; }
+.res-table { width: 100%; border-collapse: collapse; font-size: .95em; table-layout: fixed; }
+.res-table td { padding: .28em .6em; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.res-table td:nth-child(2) { text-align: center; font-weight: 700; color: var(--gold); width: 34%; }
+.res-table td:nth-child(1) { text-align: right; padding-right: 1.6em; } .res-table td:nth-child(3) { text-align: left; padding-left: 1.6em; }
+.res-table td.lead { color: #fff; font-weight: 800; text-shadow: 0 0 .6em rgba(255, 201, 74, .8); }
+.res-table th { text-align: center; opacity: .8; font-weight: 700; letter-spacing: .08em; padding-bottom: .4em; }
 .res-actions { margin-top: 1em; display: flex; flex-wrap: wrap; justify-content: center; }
 .reward { color: var(--green); font-weight: 700; margin-top: .6em; }
 

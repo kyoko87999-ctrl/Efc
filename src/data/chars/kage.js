@@ -3,7 +3,7 @@ import { buildMoves, PRE, mv, rageArt, heatSmash, rageDrive, THR } from '../lib.
 // Kage - ninja: extremely fast strings, evasive shadow step, crouching shadow stance
 const shslash = mv('shslash', null, 'Shadow Slash', 'm', 3, 2, 26, 16, -13, 0, 'stab', { ht: 'launch', lvy: 0.16, ws: true });
 const moves = buildMoves(
-  { dmg: 0.9, spd: -1 },
+  { dmg: 1.12, spd: -1 },
   {
     j1: { name: 'Blade Jab', st: 9, dmg: 5 }, j12: { name: 'Blade-Blade', dmg: 7 }, j123: { name: 'Blade-Blade-Kick', st: 8, dmg: 11 },
     j2: { st: 10, dmg: 7 },

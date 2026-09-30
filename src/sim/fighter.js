@@ -264,6 +264,7 @@ export class Fighter {
     this.stT = 0;
     this.contact = null;
     this.hitDone = false;
+    this.recEnd = null;
     this.chainQ = null;
     this.cmdBuf = null;
     this.aerial = wasAir || (this.y > 0.05 && !m.yc);
@@ -594,11 +595,11 @@ export class Fighter {
       const c = this.cmdBuf;
       if (c && !this.chainQ && this.fr <= c.exp) {
         const lk = m.nextList.find((n) => n.mask === c.mask) || m.nextList.find((n) => (n.mask & c.mask) === n.mask && c.mask);
-        if (lk && c.pf >= this.moveStart + m.cw - 1 && mf <= m.cwe) { this.chainQ = lk; this.cmdBuf = null; }
+        if (lk && c.pf >= this.moveStart + m.cw - 1 - 6 && mf <= m.cwe) { this.chainQ = lk; this.cmdBuf = null; }   // presses made just before this move began (e.g. during the last hitstop) still count
       }
       if (this.chainQ && mf >= m.cf) {
         const nm = this.chainQ.move;
-        if (!(nm.req && !this.reqOk(nm))) { this.startMove(nm); this.keepStanceFrom(m); return; }
+        if (!(nm.req && !this.reqOk(nm))) { const buf = this.cmdBuf; this.startMove(nm); this.cmdBuf = buf; this.keepStanceFrom(m); return; }
         this.chainQ = null;
       }
     }
@@ -615,7 +616,17 @@ export class Fighter {
       return;
     }
     if (m.grab && m.lv === 't' && !this.hitDone && mf >= m.st + m.ac - 1 + (m.grab.whiffRec ?? 24)) { this.endMove(); return; }
-    if (mf > m.total) this.endMove();
+    if (mf > (this.recEnd ?? m.total)) this.endMove();
+  }
+
+  // launches and juggle hits shorten the attacker's recovery so follow-ups can connect (Tekken-style hit advantage)
+  cutRecovery(f) {
+    const m = this.move;
+    if (!m) return;
+    const eff = this.recEnd ?? m.total;
+    const from = Math.max(this.mf, m.st + m.ac - 1);
+    if (eff <= from) return;
+    this.recEnd = from + Math.round((eff - from) * f);
   }
 
   keepStanceFrom() {}

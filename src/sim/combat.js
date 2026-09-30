@@ -111,6 +111,9 @@ function awayVec(att) {
   return { x: att.lockF.x, z: att.lockF.z };
 }
 
+const LAUNCH_REC = 0.35;   // share of the remaining recovery that is left after a launcher connects
+const JUGGLE_REC = 0.45;   // ... after a hit on an airborne opponent
+
 function comboScale(n) {
   if (n <= 1) return 1;
   return Math.max(0.45, 1 - 0.075 * (n - 1));
@@ -160,6 +163,7 @@ export function applyHit(match, r) {
     match.koHit(def, att, m, away, hs);
   } else if (wasAir) {
     juggleHit(match, def, att, m, ht, away);
+    att.cutRecovery(JUGGLE_REC);
   } else {
     switch (ht) {
       case 'launch': case 'tornado': case 'screw': {
@@ -167,6 +171,7 @@ export function applyHit(match, r) {
         const vp = m.lvp ?? 0.012;
         def.enterAir(vy, { x: away.x * vp, z: away.z * vp }, { kind: ht === 'launch' ? 'launch' : ht, spin: ht === 'screw' ? 1 : 0, noTech: !!m.noTech });
         def.air.ws = m.ws; def.gm = 1;
+        att.cutRecovery(LAUNCH_REC);
         break;
       }
       case 'kd': {
@@ -227,8 +232,10 @@ function juggleHit(match, def, att, m, ht, away) {
   }
   let bound = false;
   if (ht === 'bound' && !def.usedBound) { bound = true; vy = -0.14; vp = 0.03; }
+  // a hit on a target that is already high only nudges it, so it comes back down within reach for the next hit
+  if (m.jvy === undefined && ht !== 'launch' && ht !== 'tornado' && ht !== 'screw' && !bound && vy > 0) vy *= Math.max(0.25, Math.min(1, 1 - (def.y - 0.9) / 1.3));
   def.vy = vy; def.vx = away.x * vp; def.vz = away.z * vp;
-  def.gm = 1 + 0.10 * n;
+  def.gm = 1 + 0.06 * n;
   def.stT = 0;
   if (def.air) {
     def.air.kind = kind; def.air.bound = bound || def.air.bound; def.air.ws = ws; def.air.noTech = def.air.noTech || bound || !!m.noTech;

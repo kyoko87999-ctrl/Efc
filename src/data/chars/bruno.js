@@ -2,7 +2,7 @@ import { buildMoves, PRE, mv, rageArt, heatSmash, rageDrive, THR } from '../lib.
 
 // Bruno "The Bear" Kowalski - heavyweight wrestler: armoured shoulders, five different throws
 const moves = buildMoves(
-  { dmg: 1.2, spd: 2, reach: 1.03 },
+  { dmg: 1.12, spd: 2, reach: 1.03 },
   {
     j1: { name: 'Stiff Jab', dmg: 8 },
     j2: { name: 'Overhand', dmg: 11 },

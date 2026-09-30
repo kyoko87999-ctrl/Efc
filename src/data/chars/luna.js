@@ -2,7 +2,7 @@ import { buildMoves, PRE, mv, rageArt, heatSmash, rageDrive, THR } from '../lib.
 
 // Luna Vega - Capoeira: ginga sway, handstand stance, evasive low kicks
 const moves = buildMoves(
-  { dmg: 0.98, spd: 0, reach: 1.03 },
+  { dmg: 1.06, spd: 0, reach: 1.03 },
   {
     j1: { name: 'Quick Jab', dmg: 5 }, j2: { name: 'Cross', dmg: 8 },
     j123: { name: 'Jab-Cross-Meia Lua', ...PRE.hiroundL, lv: 'm', st: 9, ac: 3, rec: 22, dmg: 14, blk: -11, hit: 0, ht: 'stag' },

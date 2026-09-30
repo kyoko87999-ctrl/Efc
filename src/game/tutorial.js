@@ -9,7 +9,7 @@ export const LESSONS = [
     text: () => tr('1 = left punch, 2 = right punch, 3 = left kick, 4 = right kick. Use each button once.', '1 = หมัดซ้าย 2 = หมัดขวา 3 = เตะซ้าย 4 = เตะขวา กดแต่ละปุ่มอย่างละครั้ง'),
     goal: 4, check: (S) => S.btns.size },
   { id: 'string', dummy: 'stand', title: () => tr('Strings', 'คอมโบต่อเนื่อง'),
-    text: () => tr('Press 1 then 2 quickly to perform a string (1,2). Hit the dummy with a chain of 3 hits.', 'กด 1 แล้ว 2 เร็วๆ เพื่อใช้คอมโบ (1,2) ต่อยหุ่นซ้อมให้ติด 3 ครั้ง'),
+    text: () => tr('Strings are button chains. Press 1, then 2, then 3 in rhythm (1,2,3) and land all three hits on the dummy.', 'สตริงคือการกดปุ่มต่อเนื่อง กด 1 แล้ว 2 แล้ว 3 ตามจังหวะ (1,2,3) ให้ติดครบทั้งสามฮิต'),
     goal: 3, check: (S) => Math.min(3, S.maxCombo) },
   { id: 'guard', dummy: 'cpu1', title: () => tr('Blocking', 'การป้องกัน'),
     text: () => tr('Hold BACK to block. Hold DOWN+BACK to crouch-block low attacks. Block 4 attacks.', 'กด "ถอยหลัง" เพื่อบล็อก กด ↙ เพื่อบล็อกท่าล่าง บล็อกให้ได้ 4 ครั้ง'),

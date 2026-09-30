@@ -2,7 +2,7 @@ import { buildMoves, PRE, mv, rageArt, heatSmash, rageDrive, THR } from '../lib.
 
 // IRONCLAD-9 - combat automaton: heavy servo hits, power crush, rocket fist
 const moves = buildMoves(
-  { dmg: 1.12, spd: 1, reach: 1.02 },
+  { dmg: 1.06, spd: 1, reach: 1.02 },
   {
     j1: { name: 'Servo Jab', dmg: 7 }, j2: { name: 'Piston Cross', dmg: 10 }, j123: { name: 'Piston Combo', dmg: 15 },
     k4: { name: 'Servo Kick', dmg: 15 },

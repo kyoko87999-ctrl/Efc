@@ -7,7 +7,7 @@ const wv_hook = mv('wv_hook', null, 'Weave Hook', 'm', 8, 2, 20, 12, -8, 3, 'bod
 const wv_up = mv('wv_up', null, 'Weave Uppercut', 'm', 10, 2, 24, 15, -14, 0, 'upperL', { ht: 'launch', lvy: 0.165 });
 const wv = mv('weave', 'd/b+1', 'Bob & Weave', 'm', 15, 1, 8, 0, 0, 0, 'jab', { noHit: true, noAI: true, hb: [[1, 22, 'crouch']], inv: [[3, 20, 'h']], next: { 1: 'wv_hook', 2: 'wv_up' }, cf: 12, cw: 3, cwe: 22, crouchMove: true, mv: [[2, 14, 0.3]], aiWeight: 1 });
 const moves = buildMoves(
-  { dmg: 1.1, spd: 0 },
+  { dmg: 1.14, spd: 0 },
   {
     j1: { name: 'Jab', dmg: 7, st: 9 }, j2: { name: 'Cross', dmg: 10, st: 11 },
     j12: { name: 'One-Two', dmg: 10, next: { 1: 'j121' } },

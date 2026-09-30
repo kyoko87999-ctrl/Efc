@@ -2,7 +2,7 @@ import { buildMoves, PRE, mv, link, rageArt, heatSmash, rageDrive, THR } from '.
 
 // Tawan Srisuk - Muay Thai: elbows, knees, roundhouses, clinch
 const moves = buildMoves(
-  { dmg: 1.03, spd: 0, reach: 1.0 },
+  { dmg: 0.97, spd: 0, reach: 1.0 },
   {
     j123: { name: 'Jab-Cross-Knee', ...PRE.knee, lv: 'm', st: 9, ac: 2, rec: 22, dmg: 13, blk: -10, hit: 0, ht: 'stag', push: 0.7, pushB: 0.6 },
     k3: { name: 'Teep', ...PRE.teep, next: {} },

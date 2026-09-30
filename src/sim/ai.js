@@ -69,7 +69,7 @@ export class CpuBrain {
       air: ch.moveList.filter((m) => m.ctx === 'air'),
       dn: ch.moveList.filter((m) => m.ctx === 'dn'),
       cd: ch.moveList.filter((m) => m.ctx === 'cd'),
-      special: ch.moveList.filter((m) => m.cmd && m.ctx === 'stand' && m.aiWeight),
+      special: list.filter((m) => m.aiWeight && !m.noHit),
       ra: ch.moveList.find((m) => m.ra),
       hs: ch.moveList.find((m) => m.hs),
       rd: ch.moveList.find((m) => m.rd),
@@ -182,6 +182,7 @@ export class CpuBrain {
 
   // ---- main ----------------------------------------------------------------------
   think(match) {
+    this.match = match;
     const me = match.fighters[this.idx], opp = match.fighters[1 - this.idx];
     if (!this.pool) this.buildPool(me);
     const P = this.P;
@@ -305,7 +306,10 @@ export class CpuBrain {
     // avoid spamming the same move
     const nr = c.filter((m) => m.id !== this.lastMove || this.repeat < 2);
     const pool = nr.length ? nr : c;
-    let tot = 0; const w = pool.map((m) => { const x = (m.aiWeight || 1) * (m.id === this.lastMove ? 0.5 : 1); tot += x; return x; });
+    const oppBlocks = this.prof.blockH + this.prof.blockL;
+    // prefer moves that are safe on block; the more the opponent blocks, the more it matters
+    const safety = (m) => { const risk = m.blk >= -7 ? 1.25 : m.blk >= -10 ? 1 : m.blk >= -13 ? 0.6 : 0.35; return m.ht === 'launch' && m.lv !== 'l' ? Math.max(risk, 0.7) : 1 + (risk - 1) * (0.6 + Math.min(0.4, oppBlocks / 40)); };
+    let tot = 0; const w = pool.map((m) => { const x = (m.aiWeight || 1) * (m.id === this.lastMove ? 0.5 : 1) * safety(m); tot += x; return x; });
     let r = this.rng.next() * tot;
     for (let i = 0; i < pool.length; i++) { r -= w[i]; if (r <= 0) return pool[i]; }
     return pool[pool.length - 1];
@@ -394,7 +398,7 @@ export class CpuBrain {
 
     // --- punish opponent's recovery
     if (canAct && opp.state === ST.ATK && opp.move && opp.mf > opp.move.st + opp.move.ac - 1) {
-      const remain = opp.move.total - opp.mf;
+      const remain = (opp.recEnd ?? opp.move.total) - opp.mf;
       if (remain >= 9 && rng.chance(P.punish)) {
         const cands = [...pool.launchers, ...pool.mids, ...pool.pokes, ...pool.all].filter((m) => m.st + 1 <= remain - 1 && this.inRange(m, me, opp, 0.05));
         cands.sort((a, b) => (b.ht === 'launch' ? 25 : 0) + b.dmg - (a.ht === 'launch' ? 25 : 0) - a.dmg);
@@ -420,7 +424,13 @@ export class CpuBrain {
     // --- neutral game
     if (!canAct) return null;
     if (this.cool > 0) { this.cool--; return null; }
-    this.cool = Math.round(4 + (1 - P.aggr) * 26 + rng.int(12));
+    // urgency: attack harder late in the round, or when behind on health
+    const mt = this.match;
+    const clock = mt.timeLeft < 0 ? 1 : mt.timeLeft / (mt.rules.time * 60);
+    const behind = me.hp < opp.hp - 20;
+    const ag = clamp(P.aggr + (clock < 0.45 ? 0.15 : 0) + (behind ? 0.1 : 0), 0, 0.95);
+    this.ag = ag;
+    this.cool = Math.round(2 + (1 - ag) * 18 + rng.int(8));
 
     const r = rng.next();
     const oppAtk = opp.state === ST.ATK;
