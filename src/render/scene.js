@@ -297,6 +297,7 @@ export class GameView {
         break;
       }
       case 'wallbreak': this.onWallBreak(e); break;
+      case 'phase': if (e.idx !== this.stagePhase) this.loadStage(this.stageId, e.idx); break;
       case 'heat': { const f = m.fighters[e.who]; this.fx.burst([f.x, 0.9, f.z], 0xff9a2b, 3.6); this.rig.shake(0.5); break; }
       case 'heatburst': { const f = m.fighters[e.who]; this.fx.burst([f.x, 1.0, f.z], 0xffd08a, 4); break; }
       case 'rage': { const f = m.fighters[e.who]; this.fx.burst([f.x, 0.9, f.z], 0xff2a2a, 3.6); this.rig.shake(0.5); break; }

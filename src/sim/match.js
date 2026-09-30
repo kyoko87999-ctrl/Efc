@@ -53,9 +53,15 @@ export class Match {
   shake(a) { this.shakeAmt = Math.max(this.shakeAmt, a); }
 
   // ------------------------------------------------------------------ rounds
+  setPhase(i) {
+    if (this.pIdx === i) return;
+    this.pIdx = i;
+    this.emit({ t: 'phase', idx: i });
+  }
+
   startRound() {
     this.round++;
-    this.pIdx = 0;
+    this.setPhase(0);
     this.roundOverFlag = false;
     this.hitstop = 0;
     this.timeScale = 1;
@@ -238,7 +244,7 @@ export class Match {
     const l = swap ? b : a, r = swap ? a : b;
     for (const f of this.fighters) { f.hp = f.maxHp; f.rec = 0; f.enterIdleClean(); }
     a.x = swap ? half : -half; b.x = swap ? -half : half; a.z = 0; b.z = 0;
-    this.pIdx = 0;
+    this.setPhase(0);
     this.updateAxis();
   }
 
@@ -265,19 +271,19 @@ export class Match {
   distToWall(f, dir) {
     const bd = this.bounds;
     const B = bd.bounds;
+    const cx = bd.center ? bd.center[0] : 0, cz = bd.center ? bd.center[1] : 0;
+    const px = f.x - cx, pz = f.z - cz;
     const m = BODY_R * f.sc;
     let best = null;
     const consider = (t, wall) => { if (t >= 0 && wall && (best === null || t < best)) best = t; };
     if (B.type === 'rect') {
-      if (dir.x > 1e-4) consider((B.hx - m - f.x) / dir.x, bd.walls.px);
-      if (dir.x < -1e-4) consider((-B.hx + m - f.x) / dir.x, bd.walls.nx);
-      if (dir.z > 1e-4) consider((B.hz - m - f.z) / dir.z, bd.walls.pz);
-      if (dir.z < -1e-4) consider((-B.hz + m - f.z) / dir.z, bd.walls.nz);
+      if (dir.x > 1e-4) consider((B.hx - m - px) / dir.x, bd.walls.px);
+      if (dir.x < -1e-4) consider((-B.hx + m - px) / dir.x, bd.walls.nx);
+      if (dir.z > 1e-4) consider((B.hz - m - pz) / dir.z, bd.walls.pz);
+      if (dir.z < -1e-4) consider((-B.hz + m - pz) / dir.z, bd.walls.nz);
     } else {
-      // circle centred at origin
       const R = B.r - m;
-      const bx = f.x, bz = f.z;
-      const a = dir.x * dir.x + dir.z * dir.z, bq = 2 * (bx * dir.x + bz * dir.z), c = bx * bx + bz * bz - R * R;
+      const a = dir.x * dir.x + dir.z * dir.z, bq = 2 * (px * dir.x + pz * dir.z), c = px * px + pz * pz - R * R;
       const disc = bq * bq - 4 * a * c;
       if (disc >= 0) { const t = (-bq + Math.sqrt(disc)) / (2 * a); if (bd.walls.all) consider(t, true); }
     }
@@ -287,10 +293,12 @@ export class Match {
   bounds_() {
     const bd = this.bounds;
     const B = bd.bounds;
+    const cx = bd.center ? bd.center[0] : 0, cz = bd.center ? bd.center[1] : 0;
     for (const f of this.fighters) {
       if (f.state === ST.GRAB) continue;
       const m = BODY_R * f.sc;
       let nx = 0, nz = 0, pen = 0, side = null;
+      f.x -= cx; f.z -= cz;                    // work in arena-local coordinates
       if (B.type === 'rect') {
         if (f.x > B.hx - m) { pen = f.x - (B.hx - m); f.x = B.hx - m; nx = -1; side = 'px'; }
         else if (f.x < -B.hx + m) { pen = -B.hx + m - f.x; f.x = -B.hx + m; nx = 1; side = 'nx'; }
@@ -301,6 +309,7 @@ export class Match {
         const d = Math.hypot(f.x, f.z);
         if (d > R) { pen = d - R; nx = -f.x / d; nz = -f.z / d; f.x = -nx * R; f.z = -nz * R; side = 'all'; }
       }
+      f.x += cx; f.z += cz;
       if (pen > 0.004 && side) {
         const walls = bd.walls;
         const hasWall = walls.all || walls[side];

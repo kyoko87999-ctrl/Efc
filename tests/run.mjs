@@ -105,5 +105,24 @@ function ok(name, cond, info = '') {
   console.log('   fuzz end: phase', m.phase, 'wins', m.wins, 'round', m.round);
 }
 
+// 9. wall break: both fighters end up apart inside the next arena, and a new round resets the arena
+{
+  const tawan = (await import('../src/data/chars/tawan.js')).default;
+  const { STAGES } = await import('../src/render/stagesData.js');
+  const dojo = STAGES.find((s) => s.id === 'dojo');
+  const m = mk(tawan, kenzo, { time: 0 }, dojo);
+  const [a, b] = m.fighters;
+  a.x = 6.55; b.x = 7.7; a.z = 0; b.z = 0;
+  run(m, [[1, { r: true, b2: true }], [1, {}]], null, 60);
+  const wb = evs(m, 'wallbreak');
+  ok('wall break happens on the dojo wall', wb.length === 1 && m.pIdx === 1, 'events ' + wb.length + ' pIdx ' + m.pIdx);
+  const cx = dojo.phases[1].center[0];
+  const sep = Math.hypot(a.x - b.x, a.z - b.z);
+  ok('fighters are separated in the new arena (' + sep.toFixed(2) + ' m)', sep > 0.5, 'sep ' + sep);
+  ok('fighters stay near the new arena centre', Math.abs(a.x - cx) < 8 && Math.abs(b.x - cx) < 8, `a.x ${a.x} b.x ${b.x}`);
+  m.startRound();
+  ok('new round resets arena phase', m.pIdx === 0 && evs(m, 'phase').length >= 1);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

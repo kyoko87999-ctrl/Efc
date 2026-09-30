@@ -209,6 +209,7 @@ export class App {
       if (!handled && ev === 'back' && this.ui.top?.back) this.ui.top.back();
     }
     if (inMatch && input.latch.has('Escape')) this.pause();
+    if (!inMatch && !input.rebinding && input.latch.has('KeyF')) this.toggleFullscreen();
     if (inMatch && this.cfg?.replay) this.replayKeys();
     this.ui.update(dt);
     let alpha = 0, ts = 1;
@@ -226,6 +227,13 @@ export class App {
       if (this.fpsAcc > 0.5) { this.hud.el.fps.textContent = Math.round(this.fpsN / this.fpsAcc) + ' fps'; this.fpsAcc = 0; this.fpsN = 0; }
     }
     input.endFrame();
+  }
+
+  toggleFullscreen() {
+    try {
+      if (document.fullscreenElement) { const p = document.exitFullscreen && document.exitFullscreen(); if (p && p.catch) p.catch(() => {}); }
+      else { const p = document.documentElement.requestFullscreen && document.documentElement.requestFullscreen({ navigationUI: 'hide' }); if (p && p.catch) p.catch(() => {}); }
+    } catch (e) { /* fullscreen not permitted here */ }
   }
 
   // ---------------------------------------------------------------- match

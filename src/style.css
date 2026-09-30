@@ -141,6 +141,7 @@ h2.sub { margin: 0; font-size: 1.15em; font-weight: 500; opacity: .75; letter-sp
 .mi > span { display: inline-block; transform: skewX(10deg); }
 .mi small { display: block; font-size: .5em; font-weight: 500; opacity: .7; letter-spacing: .05em; text-transform: none; }
 .mi.focus, .mi:hover { background: linear-gradient(90deg, #ffd66b, #ff9d1a 70%, rgba(255, 157, 26, .5)); color: #10131c; border-left-color: #fff; transform: skewX(-10deg) translateX(1.2em); }
+.menu-list.compact { gap: .18em; } .menu-list.compact .mi { font-size: 1.02em; padding: .32em 1.4em .32em 1em; }
 .mi.off { opacity: .4; }
 .mi .val { float: right; margin-left: 1.5em; font-weight: 600; color: var(--gold); }
 .mi.focus .val, .mi:hover .val { color: #10131c; }

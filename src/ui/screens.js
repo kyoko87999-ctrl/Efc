@@ -18,7 +18,7 @@ void NAV_KEYS;
 const screen = (cls, ...kids) => h('div', { class: 'screen ' + cls }, ...kids);
 const hint = (html) => h('div', { class: 'hint', html });
 const kbd = (k) => `<kbd>${k}</kbd>`;
-const navHint = () => tr(`${kbd('↑↓←→')} Move &nbsp; ${kbd('Enter')} Select &nbsp; ${kbd('Esc')} Back`, `${kbd('↑↓←→')} เลื่อน &nbsp; ${kbd('Enter')} เลือก &nbsp; ${kbd('Esc')} ย้อนกลับ`);
+const navHint = () => tr(`${kbd('↑↓←→')} Move &nbsp; ${kbd('Enter')} Select &nbsp; ${kbd('Esc')} Back &nbsp; ${kbd('F')} Fullscreen`, `${kbd('↑↓←→')} เลื่อน &nbsp; ${kbd('Enter')} เลือก &nbsp; ${kbd('Esc')} ย้อนกลับ &nbsp; ${kbd('F')} เต็มจอ`);
 
 // ------------------------------------------------------------------------------ title
 export function title(app) {
@@ -67,14 +67,14 @@ export function mainMenu(app) {
     { label: tr('Ghost Battle', 'แบทเทิลผี'), d: tr('An AI that studies your habits and adapts to beat you.', 'AI ที่เรียนรู้นิสัยของคุณและปรับตัวมาเอาชนะ'), ok: go(() => M.ghost(app)) },
     { label: tr('Survival', 'เอาชีวิตรอด'), d: tr('Endless opponents. Health carries over. How far can you go?', 'ศัตรูไม่จบสิ้น พลังชีวิตสะสมต่อเนื่อง ไปได้ไกลแค่ไหน'), ok: go(() => M.survival(app)) },
     { label: tr('Practice', 'ฝึกซ้อม'), d: tr('Training room with frame data, input display, hitboxes, dummy record & playback.', 'ห้องซ้อมพร้อมเฟรมดาต้า แสดงปุ่มกด ฮิตบ็อกซ์ และบันทึก/เล่นซ้ำหุ่นซ้อม'), ok: go(() => M.practice(app)) },
-    { label: tr('Tutorial', 'สอนเล่น'), d: tr('11 interactive lessons: movement, blocking, throws, juggles, walls, Heat and Rage.', 'บทเรียน 11 บทแบบโต้ตอบ การเคลื่อนไหว บล็อก จับทุ่ม คอมโบ กำแพง Heat และ Rage'), ok: go(() => lessonMenu(app)) },
+    { label: tr('Tutorial', 'สอนเล่น'), d: tr(`${LESSONS.length} interactive lessons: movement, blocking, throws, juggles, walls, Heat and Rage.`, `บทเรียน ${LESSONS.length} บทแบบโต้ตอบ การเคลื่อนไหว บล็อก จับทุ่ม คอมโบ กำแพง Heat และ Rage`), ok: go(() => lessonMenu(app)) },
     { label: tr('Move List', 'รายการท่า'), d: tr('Every command, frame data and property of every fighter.', 'คำสั่ง เฟรมดาต้า และคุณสมบัติของท่าทุกตัวละคร'), ok: go(() => M.moveList(app)) },
     { label: tr('Customize', 'ปรับแต่งตัวละคร'), d: tr('Change costumes and colors. Saved for all modes.', 'เปลี่ยนชุดและสี บันทึกใช้ได้ทุกโหมด'), ok: go(() => M.customize(app)) },
     { label: tr('Replays', 'รีเพลย์'), d: tr('Watch your last five matches again.', 'ดูการแข่งย้อนหลัง 5 แมตช์ล่าสุด'), ok: go(() => replayScreen(app)) },
     { label: tr('Options', 'ตั้งค่า'), d: tr('Gameplay rules, video, audio, controls, language.', 'กติกา ภาพ เสียง ปุ่มควบคุม และภาษา'), ok: go(() => optionsScreen(app, false)) },
     { label: tr('Credits', 'เครดิต'), d: tr('About this game.', 'เกี่ยวกับเกมนี้'), ok: go(() => creditsScreen(app)) },
   ];
-  const list = new MenuList(items.map((it) => ({ label: it.label, ok: it.ok, d: it.d })), { onFocus: (it) => { setInfo(it.label, it.d); } });
+  const list = new MenuList(items.map((it) => ({ label: it.label, ok: it.ok, d: it.d })), { cls: 'menu-list compact', onFocus: (it) => { setInfo(it.label, it.d); } });
   const prof = h('div', { class: 'ver', style: { left: '4vw', right: 'auto', opacity: 0.85 } }, `${tr('Rank', 'แรงก์')}: ${tr(rk.en, rk.th)} · ${tr('Wins', 'ชนะ')} ${p.wins} · ${tr('Fight Money', 'เงินต่อสู้')} ${p.fm} FM`);
   const el = screen('menu-screen veil',
     h('h1', { class: 'title' }, 'EFC'), h('h2', { class: 'sub' }, tr('Main Menu', 'เมนูหลัก')),
@@ -366,6 +366,7 @@ export function optionsScreen(app, fromPause) {
       ];
       case 1: return [
         { label: tr('Graphics quality', 'คุณภาพกราฟิก'), val: () => [tr('Low', 'ต่ำ'), tr('Medium', 'กลาง'), tr('High', 'สูง')][s.quality], left: () => { s.quality = Math.max(0, s.quality - 1); apply(); }, right: () => { s.quality = Math.min(2, s.quality + 1); apply(); } },
+        { label: tr('Fullscreen', 'เต็มจอ'), val: () => (document.fullscreenElement ? tr('ON', 'เปิด') : tr('OFF', 'ปิด')), ok: () => { app.toggleFullscreen(); setTimeout(() => list && list.refresh(), 350); }, left: () => { app.toggleFullscreen(); setTimeout(() => list && list.refresh(), 350); }, right: () => { app.toggleFullscreen(); setTimeout(() => list && list.refresh(), 350); } },
         { label: tr('Camera shake', 'กล้องสั่น'), ...onoff('shake') },
         { label: tr('FPS counter', 'แสดง FPS'), ...onoff('fps') },
         { label: tr('Touch controls', 'ปุ่มสัมผัส'), val: () => ({ auto: tr('Auto', 'อัตโนมัติ'), on: tr('Always on', 'เปิดตลอด'), off: tr('Off', 'ปิด') }[s.touch]), left: () => { s.touch = cycle(['auto', 'on', 'off'], s.touch, -1); apply(); }, right: () => { s.touch = cycle(['auto', 'on', 'off'], s.touch, 1); apply(); } },

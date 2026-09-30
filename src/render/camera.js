@@ -50,9 +50,13 @@ export class CameraRig {
       const nx = n.x * Math.cos(skew) - n.z * Math.sin(skew), nz = n.x * Math.sin(skew) + n.z * Math.cos(skew);
       let D = clamp(3.3 + sep * 0.8, 4.6, 9.2);
       D = Math.min(D, camMax);
-      let H = 1.38 + clamp(sep * 0.05, 0, 0.45);
+      // keep lifted / juggled fighters in frame: pull back and tilt up when someone is high above the floor
+      const topOf = (f) => f.y + (f.state === ST.GRAB ? (f.capY || 0) : 0) + 1.7 * f.sc;
+      const lift = clamp((Math.max(topOf(a), topOf(b)) - 2.3) / 2.2, 0, 1);
+      D = Math.min(D + lift * 1.5, camMax);
+      let H = 1.38 + clamp(sep * 0.05, 0, 0.45) + lift * 0.45;
       wantPos.set(mx + nx * D, H, mz + nz * D);
-      wantLook.set(mx, 1.12, mz);
+      wantLook.set(mx, 1.12 + lift * 0.85, mz);
       wantFov = 38;
       // intro sweep
       if (match.phase === 'intro') {

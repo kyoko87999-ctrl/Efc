@@ -37,7 +37,10 @@ class Audio {
     if (!AC) { this.enabled = false; return; }
     this.ctx = new AC();
     const c = this.ctx;
-    this.master = c.createGain(); this.master.connect(c.destination);
+    this.master = c.createGain();
+    // brick-wall limiter so the loud KO / Rage Art layers never clip at the output
+    this.lim = c.createDynamicsCompressor(); this.lim.threshold.value = -2; this.lim.knee.value = 0; this.lim.ratio.value = 20; this.lim.attack.value = 0.001; this.lim.release.value = 0.12;
+    this.master.connect(this.lim); this.lim.connect(c.destination);
     this.comp = c.createDynamicsCompressor(); this.comp.threshold.value = -14; this.comp.ratio.value = 4;
     this.comp.connect(this.master);
     this.sfxG = c.createGain(); this.sfxG.connect(this.comp);
