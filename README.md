@@ -36,13 +36,14 @@ Everything is original: original characters, moves, music, sound effects, story 
 
 ### Game modes / โหมดเกม
 - **Story** — "The Iron Bell Tournament": 9 chapters following Tawan, with dialogue, cutscene cards and a final boss.
-- **Arcade Battle** — 8-stage ladder with continues, rising difficulty and the demon-lord boss on the Demon Throne.
+- **Arcade Battle** — 8-stage ladder with continues, rising difficulty, the demon-lord boss on the Demon Throne and a short ending for each of the 10 fighters.
 - **Versus (2 players)** — local: one keyboard or two gamepads (or keyboard + gamepad).
 - **VS CPU** — any fighter, any stage, any difficulty.
 - **Ghost Battle** — an AI that learns your habits (how often you block high/low, break throws, sidestep …) and adapts.
 - **Survival** — endless opponents, health carries over.
 - **Practice** — infinite health/Heat/Rage, frame-data panel, input display, hitbox view, dummy behaviours (stand, crouch, block, CPU, record & playback), position reset, swap sides.
 - **Tutorial** — 12 interactive lessons (movement, strings, blocking, levels, throws, throw break, juggles, walls, Heat, Rage, punishing).
+- **How to Play** — live key bindings for both players, gamepad mapping and the core rules on one page (also in the pause menu).
 - **Move List** — every command, level, startup, block/hit advantage, damage and properties for every fighter.
 - **Customize** — alternate costumes and free colour editing per fighter (saved).
 - **Replays** — the last five matches are recorded (inputs only, fully deterministic) and can be watched at 1/8× – 4× speed.
@@ -100,6 +101,7 @@ Node scripts in `tests/` (all headless, no browser needed):
 | `node tests/run.mjs` | Core rules: startup frames, block, high/low, throws + break, launcher, wall break, fuzz stability |
 | `node tests/moves.mjs` | Every move of every character can be executed with its documented command (444 moves) |
 | `node tests/ai_sim.mjs [games] [level]` | AI-vs-AI across the roster: crashes, NaNs, stuck states, statistics |
+| `node tests/data.mjs` | Story, stage, music, quote and ending data references are valid |
 | `node tests/replay.mjs` | Recorded inputs replay to the exact same result (determinism) |
 | `node tests/tune.mjs`, `movestats.mjs`, `combofind.mjs`, `launchstats.mjs` | Balance / combo tooling |
 

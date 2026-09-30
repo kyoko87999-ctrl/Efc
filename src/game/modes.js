@@ -3,7 +3,7 @@ import { h, MenuList } from '../ui/kit.js';
 import { tr, pick } from '../ui/i18n.js';
 import { audio } from '../audio/audio.js';
 import { save } from './save.js';
-import { STORY } from './story.js';
+import { STORY, ARCADE_ENDINGS } from './story.js';
 import { LEVELS } from '../sim/ai.js';
 import * as S from '../ui/screens.js';
 import { moveListScreen } from '../ui/movelist.js';
@@ -91,12 +91,16 @@ function resultLite(app, res, nextLabel, onNext, onQuit) {
   app.ui.push({ el, nav: (ev) => list.nav(ev), back: () => {}, overlay: true });
 }
 
-function arcadeEnding(app, state, done) {
+export function arcadeEnding(app, state, done) {
   const p = save.profile;
   p.arcadeClears++; p.fm += 500; p.exp += 60; save.write();
   app.stopMatch();
   app.ui.clear();
-  S.chapterCard(app, tr('ARCADE CLEARED!', 'จบอาร์เคด!'), `${tr('Score', 'คะแนน')} ${state.score}  ·  +500 FM  ·  +60 EXP`, () => { app.modal = false; done(); });
+  const card = () => S.chapterCard(app, tr('ARCADE CLEARED!', 'จบอาร์เคด!'), `${tr('Score', 'คะแนน')} ${state.score}  ·  +500 FM  ·  +60 EXP`, () => { app.modal = false; done(); });
+  app.setShowcase([{ id: state.me, x: 0 }], { stage: state.me === 'asura' ? 'throne' : 'rooftop', orbit: 0.08, radius: 6, height: 1.5, center: [0, 0], look: [0, 0.75, 0], fov: 36 });
+  app.showcasePose(0, 'win');
+  const ending = ARCADE_ENDINGS[state.me];
+  if (ending) S.dialogue(app, ending, card, { hero: state.me }); else card();
 }
 
 // ------------------------------------------------------------------------------ story

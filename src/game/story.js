@@ -53,3 +53,57 @@ export const QUOTES = {
   ironclad: [['TARGET NEUTRALISED.', 'เป้าหมายถูกกำจัด'], ['CALCULATING...', 'กำลังคำนวณ...']],
   asura: [['Kneel.', 'คุกเข่าซะ'], ['Your soul is mine.', 'วิญญาณเจ้าเป็นของข้า']],
 };
+
+// Short bilingual epilogue shown when the Arcade ladder is cleared, one per fighter.
+export const ARCADE_ENDINGS = {
+  kenzo: [
+    { who: 'narr', en: 'The last seal breaks. The tower falls silent and the old champion finally stands alone.', th: 'ผนึกสุดท้ายแตกสลาย หอคอยเงียบงัน อดีตแชมป์ยืนอยู่เพียงลำพังในที่สุด' },
+    { who: 'kenzo', en: 'The belt was never the goal. Discipline is the only thing that cannot be taken from me.', th: 'เข็มขัดไม่เคยเป็นเป้าหมาย วินัยคือสิ่งเดียวที่ไม่มีใครแย่งไปจากข้าได้' },
+    { who: 'narr', en: 'Kenzo returns to his dojo and opens its doors to anyone who wants to learn.', th: 'เคนโซกลับสู่โดโจของเขา และเปิดประตูต้อนรับทุกคนที่อยากเรียน' },
+  ],
+  tawan: [
+    { who: 'narr', en: 'The prize money arrives the next morning. The loan sharks are gone before noon.', th: 'เงินรางวัลถึงมือในเช้าวันรุ่งขึ้น เจ้าหนี้หายตัวไปก่อนเที่ยง' },
+    { who: 'tawan', en: 'Kids, get your gloves. Training starts at five. The gym is ours again!', th: 'เด็กๆ หยิบนวมได้แล้ว ซ้อมตอนตีห้า ค่ายของเรากลับมาเป็นของเราอีกครั้ง!' },
+    { who: 'narr', en: 'Under the railway bridge, a new generation of Muay Thai fighters begins to train.', th: 'ใต้สะพานรถไฟ นักมวยไทยรุ่นใหม่เริ่มฝึกซ้อมอีกครั้ง' },
+  ],
+  meilan: [
+    { who: 'narr', en: 'On the mountain path Mei Lan finds the man who broke her school. He does not run.', th: 'บนเส้นทางภูเขา เหม่ยหลานพบชายผู้ทำลายสำนักของเธอ เขาไม่หนี' },
+    { who: 'meilan', en: 'A palm is not for revenge. It is for the students who will need a school to come home to.', th: 'ฝ่ามือไม่ได้มีไว้แก้แค้น แต่มีไว้ปกป้องศิษย์ที่ต้องการสำนักเป็นบ้าน' },
+    { who: 'narr', en: 'The Silent Dragon school rises again, stone by stone.', th: 'สำนักมังกรเงียบกลับมาตั้งขึ้นอีกครั้ง ทีละก้อนหิน' },
+  ],
+  jaeho: [
+    { who: 'jaeho', en: 'They said kicks are too slow to beat a demon. Tell that to the ceiling I just went through.', th: 'ใครว่าเตะช้าเกินกว่าจะชนะปีศาจ ไปบอกเพดานที่ฉันเตะทะลุสิ' },
+    { who: 'narr', en: 'Jae-ho opens a taekwondo academy in Seoul. The first lesson is always footwork.', th: 'แจโฮเปิดสถาบันเทควันโดในโซล บทเรียนแรกคือฟุตเวิร์คเสมอ' },
+    { who: 'narr', en: 'His students call him Storm Kick. He pretends to hate it.', th: 'ลูกศิษย์เรียกเขาว่า "พายุเท้า" เขาแกล้งทำเป็นเกลียด' },
+  ],
+  marcus: [
+    { who: 'narr', en: 'Among the freed fighters, one figure runs across the arena and nearly knocks Marcus over.', th: 'ในหมู่นักสู้ที่ได้รับอิสรภาพ มีคนหนึ่งวิ่งข้ามสังเวียนมากอดมาร์คัสจนเกือบล้ม' },
+    { who: 'marcus', en: 'Little brother. I told you I would find you. Now let us go home.', th: 'น้องชาย พี่บอกแล้วว่าจะหานายให้เจอ กลับบ้านกันเถอะ' },
+    { who: 'narr', en: 'The Hammer hangs up his gloves for one night — and holds his family instead.', th: 'ค้อนเหล็กแขวนนวมไว้หนึ่งคืน แล้วกอดครอบครัวแทน' },
+  ],
+  bruno: [
+    { who: 'bruno', en: 'A bear does not need a loan shark. A bear needs a gym and a big lunch.', th: 'หมีไม่ต้องการเจ้าหนี้ หมีต้องการยิมกับมื้อเที่ยงมื้อใหญ่' },
+    { who: 'narr', en: 'Bruno sends the prize money home and opens a wrestling school for the neighbourhood kids.', th: 'บรูโนส่งเงินรางวัลกลับบ้านและเปิดโรงเรียนมวยปล้ำให้เด็กๆ ในละแวกนั้น' },
+    { who: 'narr', en: 'Every Sunday, the whole street comes to watch him lose to a six-year-old on purpose.', th: 'ทุกวันอาทิตย์ทั้งถนนมาดูเขาแกล้งแพ้เด็กหกขวบ' },
+  ],
+  luna: [
+    { who: 'luna', en: 'The temple prisoners are free. Now the roda must be bigger, the drums louder!', th: 'นักโทษในวิหารเป็นอิสระแล้ว ต่อไปวงโรดาต้องใหญ่ขึ้น กลองต้องดังขึ้น!' },
+    { who: 'narr', en: 'On the ruins of the Sunken Temple, Luna leads a capoeira circle at sunrise.', th: 'บนซากวิหารใต้พิภพ ลูน่านำวงคาโปเอร่ายามตะวันขึ้น' },
+    { who: 'narr', en: 'The berimbau plays. The Ginga Queen smiles.', th: 'เสียงเบริมเบาดังขึ้น ราชินีจิงก้ายิ้ม' },
+  ],
+  kage: [
+    { who: 'narr', en: 'With the master gone, the shadow has no orders left to follow.', th: 'เมื่อนายท่านสิ้นไป เงามืดก็ไม่มีคำสั่งให้ทำตามอีกต่อไป' },
+    { who: 'kage', en: 'A blade without a hand is only iron. I will learn what it means to choose my own path.', th: 'ดาบที่ไร้มือก็เป็นเพียงเหล็ก ข้าจะเรียนรู้ที่จะเลือกทางของตัวเอง' },
+    { who: 'narr', en: 'At dawn, Kage vanishes over the rooftops. No one sees where he goes.', th: 'รุ่งเช้า เคจหายไปเหนือหลังคา ไม่มีใครเห็นว่าเขาไปทางไหน' },
+  ],
+  ironclad: [
+    { who: 'ironclad', en: 'MISSION COMPLETE. CORE DIRECTIVE... CORRUPTED. REQUESTING NEW PURPOSE.', th: 'ภารกิจสำเร็จ คำสั่งหลัก... เสียหาย ร้องขอวัตถุประสงค์ใหม่' },
+    { who: 'narr', en: 'A child asks the machine to hold a lantern during the festival. IRONCLAD-9 complies.', th: 'เด็กคนหนึ่งขอให้หุ่นยนต์ช่วยถือโคมในงานเทศกาล ไอรอนแคลด-9 ทำตาม' },
+    { who: 'ironclad', en: 'NEW DIRECTIVE ACCEPTED: PROTECT.', th: 'รับคำสั่งใหม่: ปกป้อง' },
+  ],
+  asura: [
+    { who: 'asura', en: 'Kneel, little world. The tournament was only my first breath.', th: 'ก้มลงเถิด โลกน้อย ศึกนี้เป็นเพียงลมหายใจแรกของข้า' },
+    { who: 'narr', en: 'The seals shatter one by one. Beyond the tower, the sky turns violet.', th: 'ผนึกแตกสลายทีละอัน เหนือหอคอย ท้องฟ้าเปลี่ยนเป็นสีม่วง' },
+    { who: 'narr', en: 'The Demon Lord spreads his wings. A new age begins — for better or worse.', th: 'จอมมารกางปีก ยุคใหม่เริ่มต้นขึ้น ไม่ว่าจะดีหรือร้าย' },
+  ],
+};
