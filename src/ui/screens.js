@@ -68,6 +68,7 @@ export function mainMenu(app) {
     { label: tr('Survival', 'เอาชีวิตรอด'), d: tr('Endless opponents. Health carries over. How far can you go?', 'ศัตรูไม่จบสิ้น พลังชีวิตสะสมต่อเนื่อง ไปได้ไกลแค่ไหน'), ok: go(() => M.survival(app)) },
     { label: tr('Practice', 'ฝึกซ้อม'), d: tr('Training room with frame data, input display, hitboxes, dummy record & playback.', 'ห้องซ้อมพร้อมเฟรมดาต้า แสดงปุ่มกด ฮิตบ็อกซ์ และบันทึก/เล่นซ้ำหุ่นซ้อม'), ok: go(() => M.practice(app)) },
     { label: tr('Tutorial', 'สอนเล่น'), d: tr(`${LESSONS.length} interactive lessons: movement, blocking, throws, juggles, walls, Heat and Rage.`, `บทเรียน ${LESSONS.length} บทแบบโต้ตอบ การเคลื่อนไหว บล็อก จับทุ่ม คอมโบ กำแพง Heat และ Rage`), ok: go(() => lessonMenu(app)) },
+    { label: tr('How to Play', 'วิธีเล่น'), d: tr('Controls for keyboard, gamepad and touch, plus the core rules in one page.', 'ปุ่มควบคุมคีย์บอร์ด จอย และทัชสกรีน พร้อมกฎพื้นฐานในหน้าเดียว'), ok: go(() => helpScreen(app, false)) },
     { label: tr('Move List', 'รายการท่า'), d: tr('Every command, frame data and property of every fighter.', 'คำสั่ง เฟรมดาต้า และคุณสมบัติของท่าทุกตัวละคร'), ok: go(() => M.moveList(app)) },
     { label: tr('Customize', 'ปรับแต่งตัวละคร'), d: tr('Change costumes and colors. Saved for all modes.', 'เปลี่ยนชุดและสี บันทึกใช้ได้ทุกโหมด'), ok: go(() => M.customize(app)) },
     { label: tr('Replays', 'รีเพลย์'), d: tr('Watch your last five matches again.', 'ดูการแข่งย้อนหลัง 5 แมตช์ล่าสุด'), ok: go(() => replayScreen(app)) },
@@ -324,6 +325,7 @@ export function pauseMenu(app) {
       items.push({ label: () => (app.practiceRec?.active ? tr('Stop recording', 'หยุดบันทึก') : tr('Record dummy', 'บันทึกหุ่นซ้อม')), ok: () => { if (app.practiceRec.active) app.stopPracticeRecord(); else app.startPracticeRecord(); close(); } });
       if (dummy.tape && dummy.tape.length) items.push({ label: tr('Play recording', 'เล่นบันทึก'), ok: () => { dummy.setMode('playback'); close(); } });
     }
+    items.push({ label: tr('Controls', 'วิธีเล่น / ปุ่ม'), ok: () => helpScreen(app, true) });
     items.push({ label: tr('Command List', 'รายการท่า'), ok: () => M.moveList(app, app.match.fighters[0].ch.id, () => { app.ui.pop(); }, true) });
     if (cfg.tutorial) items.push({ label: tr('Lessons', 'บทเรียน'), ok: () => { app.ui.pop(); app.stopMatch(); lessonMenu(app); } });
     items.push({ label: tr('Restart', 'เริ่มใหม่'), ok: () => { app.ui.clear(); app.restartMatch(); } });
@@ -405,6 +407,42 @@ export function optionsScreen(app, fromPause) {
     back() { input.rebinding = null; save.write(); if (fromPause) app.ui.pop(); else { app.ui.pop(); if (!app.ui.top) mainMenu(app); } },
   };
   app.ui.push(scr);
+}
+
+// ------------------------------------------------------------------------------ how to play
+const ARROWS = { ArrowLeft: '←', ArrowRight: '→', ArrowUp: '↑', ArrowDown: '↓' };
+const keyName = (c) => ARROWS[c] || (c || '').replace(/^Key/, '').replace(/^Digit/, '').replace('Numpad', 'Num ').replace('Comma', ',').replace('Period', '.').replace('Slash', '/').replace('ShiftRight', 'R-Shift');
+export function helpScreen(app, fromPause) {
+  const B = input.binds;
+  const ks = (who, a) => (B[who][a] || []).map(keyName).join('  or  ');
+  const row = (label, p1, p2, pad) => h('tr', {}, h('th', {}, label), h('td', {}, p1), h('td', {}, p2), h('td', {}, pad));
+  const table = h('table', { class: 'help-tbl' },
+    h('tr', {}, h('th', {}), h('td', { class: 'hd' }, tr('Player 1', 'ผู้เล่น 1')), h('td', { class: 'hd' }, tr('Player 2', 'ผู้เล่น 2')), h('td', { class: 'hd' }, tr('Gamepad', 'จอยเกม'))),
+    row(tr('Move ← →', 'เดิน ← →'), `${ks('p1', 'l')} ${ks('p1', 'r')}`, `${ks('p2', 'l')} ${ks('p2', 'r')}`, 'D-pad / L-stick'),
+    row(tr('Up / Down', 'ขึ้น / ลง'), `${ks('p1', 'u')} ${ks('p1', 'd')}`, `${ks('p2', 'u')} ${ks('p2', 'd')}`, ''),
+    row(tr('1 Left Punch', '1 หมัดซ้าย'), ks('p1', 'b1'), ks('p2', 'b1'), 'X'),
+    row(tr('2 Right Punch', '2 หมัดขวา'), ks('p1', 'b2'), ks('p2', 'b2'), 'Y'),
+    row(tr('3 Left Kick', '3 เตะซ้าย'), ks('p1', 'b3'), ks('p2', 'b3'), 'A'),
+    row(tr('4 Right Kick', '4 เตะขวา'), ks('p1', 'b4'), ks('p2', 'b4'), 'B'),
+    row(tr('Heat 2+3', 'Heat 2+3'), ks('p1', 'm23'), ks('p2', 'm23'), 'RT'),
+    row(tr('Rage Art 1+2', 'Rage Art 1+2'), ks('p1', 'm12'), ks('p2', 'm12'), 'LT'),
+    row(tr('Throw 1+3 / 2+4', 'จับทุ่ม 1+3 / 2+4'), `${ks('p1', 'm13')} / ${ks('p1', 'm24')}`, `${ks('p2', 'm13')} / ${ks('p2', 'm24')}`, 'LB / RB'),
+    row(tr('Pause', 'หยุดเกม'), 'Esc / Tab', '', 'Start'));
+  const tips = [
+    [tr('Move & defend', 'เคลื่อนที่และป้องกัน'), tr('Tap forward twice to dash. Tap up or down to sidestep around attacks. Hold BACK to block; hold DOWN+BACK to block low attacks.', 'กดหน้าสองครั้งเพื่อแดช กดขึ้นหรือลงเพื่อสเต็ปหลบข้าง กดถอยหลังเพื่อบล็อก กด ↙ เพื่อบล็อกท่าล่าง')],
+    [tr('High / mid / low', 'บน / กลาง / ล่าง'), tr('Highs miss a crouching enemy, lows must be blocked crouching, mids beat crouch-blocking. Check the level of every move in the Command List.', 'ท่าบนพลาดถ้าคู่ต่อสู้ย่อ ท่าล่างต้องบล็อกแบบย่อ ท่ากลางทะลวงการย่อ ดูระดับของทุกท่าได้ในรายการท่า')],
+    [tr('Throws', 'จับทุ่ม'), tr('Throws beat blocking but can be ducked. When grabbed, press 1 (1+3 throws) or 2 (2+4 throws) quickly to break free.', 'จับทุ่มชนะการบล็อกแต่ย่อหลบได้ เมื่อโดนจับให้กด 1 (ท่า 1+3) หรือ 2 (ท่า 2+4) ให้ทันเพื่อสลัดหลุด')],
+    [tr('Launch & combo', 'ส่งลอยและคอมโบ'), tr('Launchers (e.g. d/f+2) send the enemy airborne: keep hitting while they fly. Strong moves near a wall cause a wall splat for extra combos.', 'ท่าส่งลอย (เช่น d/f+2) ทำให้ศัตรูลอย ตามตีต่อได้ ท่าแรงๆ ใกล้กำแพงจะทำให้ติดกำแพงเพื่อต่อคอมโบ')],
+    [tr('Heat & Rage', 'Heat และ Rage'), tr('Heat (2+3) powers you up for a few seconds with chip damage and Heat Dash. At low health you enter Rage: 1+2 unleashes a Rage Art.', 'Heat (2+3) เพิ่มพลังชั่วคราว ทำดาเมจแม้ถูกบล็อก และใช้ Heat Dash ได้ เมื่อเลือดต่ำจะเข้าสู่ Rage กด 1+2 เพื่อใช้ Rage Art')],
+    [tr('Learn more', 'เรียนรู้เพิ่มเติม'), tr('Tutorial teaches everything step by step. Practice shows frame data and hitboxes. Every fighter has 50+ moves: open the Command List from the pause menu.', 'โหมดสอนเล่นสอนทุกอย่างทีละขั้น โหมดฝึกซ้อมแสดงเฟรมดาต้าและฮิตบ็อกซ์ ตัวละครละ 50+ ท่า เปิดรายการท่าได้จากเมนูพัก')],
+  ];
+  const back = () => { if (fromPause) app.ui.pop(); else { app.ui.pop(); if (!app.ui.top) mainMenu(app); } };
+  const panel = h('div', { class: 'help' },
+    h('h1', { class: 'title', style: { fontSize: '1.8em', marginBottom: '.3em' } }, tr('How to Play', 'วิธีเล่น')),
+    h('div', { class: 'help-grid' }, table, h('div', { class: 'help-tips' }, ...tips.map(([t, d]) => h('div', { class: 'tip' }, h('b', {}, t), h('p', {}, d))))),
+    h('div', { class: 'btn help-back', onClick: () => { audio.sfx('ui_back'); back(); } }, h('span', {}, tr('Back', 'กลับ'))));
+  const el = screen('dark', panel, hint(navHint()));
+  app.ui.push({ el, nav: (ev) => { if (ev === 'ok') { back(); return true; } return false; }, back, overlay: !!fromPause });
 }
 
 // ------------------------------------------------------------------------------ credits

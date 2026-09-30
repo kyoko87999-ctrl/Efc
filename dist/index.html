@@ -286,8 +286,9 @@ h2.sub { margin: 0; font-size: 1.15em; font-weight: 500; opacity: .75; letter-sp
 .cust-panel { width: 30vw; margin-left: auto; background: var(--panel); border: 1px solid var(--line); border-top: .25em solid var(--gold); padding: 1em 1.2em; overflow-y: auto; max-height: 88vh; }
 
 /* toast */
-.toast { position: absolute; top: 3vh; left: 50%; transform: translateX(-50%); padding: .5em 1.4em; background: rgba(10, 12, 20, .92); border: 1px solid var(--gold); color: var(--gold); font-weight: 700; letter-spacing: .06em; animation: toast 2.2s forwards; }
-@keyframes toast { 0% { opacity: 0; transform: translate(-50%, -1em); } 10% { opacity: 1; transform: translate(-50%, 0); } 85% { opacity: 1; } 100% { opacity: 0; } }
+.toast { position: absolute; bottom: 13vh; left: 50%; transform: translateX(-50%); padding: .5em 1.4em; background: rgba(10, 12, 20, .92); border: 1px solid var(--gold); color: var(--gold); font-weight: 700; letter-spacing: .06em; animation: toast 2.2s forwards; }
+@keyframes toast { 0% { opacity: 0; transform: translate(-50%, 1em); } 8% { opacity: 1; transform: translate(-50%, 0); } 88% { opacity: 1; } 100% { opacity: 0; } }
+.toast + .toast { bottom: calc(13vh + 3.2em); }
 .loading { align-items: center; justify-content: center; background: #05060a; pointer-events: auto; font-size: 1.4em; letter-spacing: .3em; }
 .loading i { display: block; width: 14em; height: .3em; background: #222; margin-top: 1em; overflow: hidden; } .loading i b { display: block; height: 100%; background: var(--gold); width: 30%; animation: ld 1s infinite linear; }
 @keyframes ld { from { margin-left: -30%; } to { margin-left: 100%; } }
@@ -315,6 +316,19 @@ h2.sub { margin: 0; font-size: 1.15em; font-weight: 500; opacity: .75; letter-sp
 }
 
 @media (prefers-reduced-motion: reduce) { .screen, .logo, .banner.show, .tag, .dn { animation-duration: .01s !important; animation-delay: 0s !important; } }
+
+/* ======================================================== how to play */
+.help { margin: auto; width: min(92vw, 1100px); max-height: 92vh; overflow-y: auto; padding: 1.2em 1.6em; background: var(--panel); border: 1px solid var(--line); border-top: .25em solid var(--gold); scrollbar-width: thin; }
+.help-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 1.6em; align-items: start; }
+.help-tbl { width: 100%; border-collapse: collapse; font-size: .9em; }
+.help-tbl th { text-align: left; font-weight: 700; color: var(--gold); padding: .3em .6em .3em 0; white-space: nowrap; }
+.help-tbl td { padding: .3em .5em; border-bottom: 1px solid var(--line); opacity: .95; }
+.help-tbl td.hd { color: var(--cyan); font-weight: 700; border-bottom-color: rgba(255, 255, 255, .35); }
+.help-tips .tip { margin-bottom: .8em; }
+.help-tips b { color: var(--gold); text-transform: uppercase; letter-spacing: .06em; font-size: .85em; }
+.help-tips p { margin: .15em 0 0; font-size: .9em; line-height: 1.45; opacity: .92; }
+.help-back { margin-top: 1em; display: inline-block; }
+@media (max-width: 760px), (max-aspect-ratio: 1/1) { .help-grid { grid-template-columns: 1fr; } }
 
 </style>
 </head>

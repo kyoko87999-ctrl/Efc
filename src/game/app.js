@@ -423,6 +423,11 @@ export class App {
     this.tut = null;
     if (cfg.tutorial) this.startLesson(cfg.tutorial.index || 0);
     audio.playTrack(cfg.music || stageDef.music);
+    // first few matches: remind the player of the basic controls
+    if (!cfg.replay && !cfg.tutorial && (save.data.hints || 0) < 3) {
+      save.data.hints = (save.data.hints || 0) + 1; save.write();
+      setTimeout(() => { if (this.match === m && !this.touch.active) toast(tr('A/D move · W/S sidestep · U I J K = 1 2 3 4 · Esc pause & controls', 'A/D เดิน · W/S สเต็ป · U I J K = 1 2 3 4 · Esc หยุดเกมและดูปุ่ม')); }, 2600);
+    }
     this.updateTouchVisibility();
     if (cfg.showVs !== false && !cfg.practice && !cfg.replay) S.vsSplash(this, cfg);
     else this.hud.root.classList.remove('nohud');

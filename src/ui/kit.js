@@ -118,8 +118,10 @@ export class UI {
 export function toast(text) {
   const box = $('#toast');
   const t = h('div', { class: 'toast' }, text);
+  const ms = text.length > 60 ? 4200 : 2300;
+  t.style.animationDuration = ms + 'ms';
   box.append(t);
-  setTimeout(() => t.remove(), 2300);
+  setTimeout(() => t.remove(), ms);
 }
 
 export const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
