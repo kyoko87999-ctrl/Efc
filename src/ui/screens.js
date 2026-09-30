@@ -369,6 +369,7 @@ export function optionsScreen(app, fromPause) {
       case 1: return [
         { label: tr('Graphics quality', 'คุณภาพกราฟิก'), val: () => [tr('Low', 'ต่ำ'), tr('Medium', 'กลาง'), tr('High', 'สูง')][s.quality], left: () => { s.quality = Math.max(0, s.quality - 1); apply(); }, right: () => { s.quality = Math.min(2, s.quality + 1); apply(); } },
         { label: tr('Fullscreen', 'เต็มจอ'), val: () => (document.fullscreenElement ? tr('ON', 'เปิด') : tr('OFF', 'ปิด')), ok: () => { app.toggleFullscreen(); setTimeout(() => list && list.refresh(), 350); }, left: () => { app.toggleFullscreen(); setTimeout(() => list && list.refresh(), 350); }, right: () => { app.toggleFullscreen(); setTimeout(() => list && list.refresh(), 350); } },
+        { label: tr('Auto quality', 'ปรับคุณภาพอัตโนมัติ'), ...onoff('autoQuality') },
         { label: tr('Camera shake', 'กล้องสั่น'), ...onoff('shake') },
         { label: tr('FPS counter', 'แสดง FPS'), ...onoff('fps') },
         { label: tr('Touch controls', 'ปุ่มสัมผัส'), val: () => ({ auto: tr('Auto', 'อัตโนมัติ'), on: tr('Always on', 'เปิดตลอด'), off: tr('Off', 'ปิด') }[s.touch]), left: () => { s.touch = cycle(['auto', 'on', 'off'], s.touch, -1); apply(); }, right: () => { s.touch = cycle(['auto', 'on', 'off'], s.touch, 1); apply(); } },

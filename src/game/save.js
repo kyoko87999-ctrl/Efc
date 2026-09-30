@@ -4,7 +4,7 @@ const KEY = 'efc.save.v1';
 const DEFAULTS = () => ({
   settings: {
     lang: null, master: 0.8, music: 0.5, sfx: 0.85, voice: 0.8, announcer: true,
-    quality: 2, shake: true, showFx: true, fps: false, touch: 'auto',
+    quality: 2, autoQuality: true, shake: true, showFx: true, fps: false, touch: 'auto',
     rounds: 2, time: 60, difficulty: 2, heat: true, rage: true, recoverable: true, tech: true, dmgMul: 1,
     inputDisplay: false, binds: null, hitboxes: false, camShake: 1,
   },

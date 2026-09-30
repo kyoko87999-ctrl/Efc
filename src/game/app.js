@@ -221,12 +221,27 @@ export class App {
       this.hud.update(dt * 60, {});
     } else this.updateShowcase(dt);
     this.gv.frame(this.paused ? 0 : dt, alpha, ts);
+    this.adaptQuality(dt);
     // fps
     if (save.settings.fps) {
       this.fpsAcc += dt; this.fpsN++;
       if (this.fpsAcc > 0.5) { this.hud.el.fps.textContent = Math.round(this.fpsN / this.fpsAcc) + ' fps'; this.fpsAcc = 0; this.fpsN = 0; }
     }
     input.endFrame();
+  }
+
+  // drop one graphics level when the device clearly cannot hold ~40 fps (never raises it again, never under automation)
+  adaptQuality(dt) {
+    const st = save.settings;
+    if (!st.autoQuality || navigator.webdriver || !this.match || this.paused || this.modal || this.frozen || st.quality <= 0) { this.slowT = 0; this.perfT = 0; return; }
+    this.perfT = (this.perfT || 0) + dt;
+    if (dt > 0.03 && dt < 0.12) this.slowT = (this.slowT || 0) + dt;
+    else if (dt < 0.022) this.slowT = Math.max(0, (this.slowT || 0) - dt * 2);
+    if (this.perfT > 6 && this.slowT > 3) {
+      st.quality--; save.write(); this.applySettings();
+      toast(tr('Graphics lowered to keep the game smooth (Options > Video)', 'ลดคุณภาพกราฟิกเพื่อให้เล่นลื่นขึ้น (ตั้งค่า > ภาพ)'));
+      this.slowT = 0; this.perfT = 0;
+    }
   }
 
   toggleFullscreen() {
