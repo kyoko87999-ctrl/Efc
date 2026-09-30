@@ -64,6 +64,8 @@ export class App {
     const unlock = () => { audio.unlock(); };
     addEventListener('pointerdown', unlock); addEventListener('keydown', unlock);
     document.addEventListener('visibilitychange', () => { if (document.hidden && this.match && !this.paused && !this.cfg?.replay) this.pause(); });
+    // losing keyboard focus (e.g. clicking outside the embedded frame) pauses the fight instead of leaving keys stuck
+    addEventListener('blur', () => { if (!navigator.webdriver && this.match && !this.paused && !this.modal && !this.cfg?.replay && !this.cfg?.tutorial) this.pause(); });
     this.frame = this.frame.bind(this);
   }
 

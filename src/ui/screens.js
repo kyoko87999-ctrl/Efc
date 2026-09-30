@@ -29,7 +29,7 @@ export function title(app) {
     h('div', {},
       h('div', { class: 'logo' }, 'EFC'),
       h('div', { class: 'logo-sub' }, 'Elite Fighters Championship')),
-    h('div', { class: 'press' }, app.isTouch ? tr('TAP TO START', 'แตะเพื่อเริ่ม') : tr('PRESS ANY BUTTON', 'กดปุ่มใดก็ได้')),
+    h('div', { class: 'press' }, app.isTouch ? tr('TAP TO START', 'แตะเพื่อเริ่ม') : tr('PRESS ANY BUTTON', 'กดปุ่มใดก็ได้'), h('small', {}, app.isTouch ? '' : tr('click the game first if keys do not respond', 'ถ้าปุ่มไม่ตอบสนอง ให้คลิกที่เกมก่อน'))),
     h('div', { class: 'ver' }, 'v1.0'));
   const go = () => { audio.unlock(); audio.sfx('ui_select'); mainMenu(app); };
   el.addEventListener('click', go);
