@@ -1,0 +1,19 @@
+{
+  "name": "efc-fighting-game",
+  "version": "1.0.0",
+  "description": "EFC: Elite Fighters Championship - a 3D fighting game for the browser inspired by modern 3D fighters (4-button, Heat, Rage, walls, juggles, frame data).",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/build.mjs --watch",
+    "build": "node scripts/build.mjs",
+    "test": "node tests/run.mjs",
+    "serve": "npx http-server dist -p 8080 -c-1"
+  },
+  "dependencies": {
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

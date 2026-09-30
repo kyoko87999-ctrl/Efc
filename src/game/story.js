@@ -1,0 +1,55 @@
+// Story mode script (bilingual). Protagonist: Tawan Srisuk.
+// who: character id | 'narr'
+export const STORY = {
+  title: 'The Iron Bell Tournament', titleTH: 'ศึกระฆังเหล็ก',
+  hero: 'tawan',
+  prologue: [
+    { who: 'narr', en: 'Bangkok. A small Muay Thai gym under a railway bridge is one month from being seized by loan sharks.', th: 'กรุงเทพฯ ค่ายมวยเล็กๆ ใต้สะพานรถไฟกำลังจะถูกยึดภายในหนึ่งเดือน' },
+    { who: 'tawan', en: 'The EFC world tournament... 100 million baht for the champion. I will fight for every kid in this gym.', th: 'ศึก EFC ชิงแชมป์โลก... เงินรางวัลร้อยล้านบาท ผมจะสู้เพื่อเด็กทุกคนในค่ายนี้' },
+    { who: 'narr', en: 'But no one has ever asked who runs the tournament — or where the losers go.', th: 'แต่ไม่เคยมีใครถามเลยว่าใครคือผู้จัดการแข่งขัน... และผู้แพ้ไปอยู่ที่ไหน' },
+  ],
+  chapters: [
+    { opp: 'jaeho', stage: 'ring', title: 'Chapter 1 - Opening Night', titleTH: 'บทที่ 1 - คืนเปิดสังเวียน', level: 1,
+      pre: [{ who: 'jaeho', en: 'Your kicks are strong, but your footwork is a museum piece. Show me something new, Thai boxer.', th: 'เตะคุณหนักดี แต่ฟุตเวิร์คเหมือนของโบราณ ลองโชว์อะไรใหม่ๆ ให้ดูหน่อย นักมวยไทย' }, { who: 'tawan', en: 'Eight limbs against two legs. Come on.', th: 'แปดอาวุธสู้สองขา มาเลย' }],
+      post: [{ who: 'jaeho', en: 'Not bad. Word of advice: the sponsor of this tournament is not human. Be careful.', th: 'ไม่เลว... เตือนไว้อย่างหนึ่ง ผู้สนับสนุนงานนี้ไม่ใช่มนุษย์ ระวังตัวไว้' }] },
+    { opp: 'marcus', stage: 'alley', title: 'Chapter 2 - Back Alley Debt', titleTH: 'บทที่ 2 - หนี้ในตรอกมืด', level: 1,
+      pre: [{ who: 'marcus', en: 'My little brother entered this tournament last year. He never came home. I am not leaving without answers.', th: 'น้องชายผมเข้าร่วมศึกนี้เมื่อปีก่อน แล้วไม่เคยกลับบ้านอีกเลย ผมจะไม่ไปจนกว่าจะได้คำตอบ' }, { who: 'tawan', en: 'Then we want the same thing. But I still have to win.', th: 'งั้นเราต้องการสิ่งเดียวกัน แต่ผมก็ต้องชนะ' }],
+      post: [{ who: 'marcus', en: 'Heh... that elbow hurts. Find the truth for both of us.', th: 'ฮึ... ศอกนั่นเจ็บจริง ช่วยหาความจริงให้เราทั้งคู่ด้วย' }] },
+    { opp: 'luna', stage: 'temple', title: 'Chapter 3 - The Sunken Temple', titleTH: 'บทที่ 3 - วิหารใต้พิภพ', level: 2,
+      pre: [{ who: 'luna', en: 'Every loser is taken below the temple. I have seen it. Fight me if you must, but listen carefully.', th: 'ผู้แพ้ทุกคนถูกพาลงไปใต้วิหาร ฉันเห็นมากับตา จะสู้กับฉันก็ได้ แต่ฟังให้ดี' }, { who: 'tawan', en: 'Tell me after the fight.', th: 'เล่าให้ฟังหลังการต่อสู้' }],
+      post: [{ who: 'luna', en: 'The Demon Lord Asura feeds on the strength of defeated fighters. Only the champion can face him.', th: 'จอมมารอสุระดูดพลังจากนักสู้ที่พ่ายแพ้ มีเพียงแชมป์เท่านั้นที่เผชิญหน้ากับเขาได้' }] },
+    { opp: 'meilan', stage: 'dojo', title: 'Chapter 4 - Moonlit Dojo', titleTH: 'บทที่ 4 - โดโจใต้แสงจันทร์', level: 2,
+      pre: [{ who: 'meilan', en: 'I hunt the man who destroyed my school. Anyone who blocks my path to Kenzo will feel my palms.', th: 'ฉันตามล่าชายที่ทำลายสำนักของฉัน ใครขวางทางไปหาเคนโซ จะได้รู้จักฝ่ามือของฉัน' }],
+      post: [{ who: 'meilan', en: 'You fight with a clean heart. Kenzo waits at the volcano. He is not what he seems.', th: 'เจ้าสู้ด้วยใจบริสุทธิ์ เคนโซรออยู่ที่ปากปล่องภูเขาไฟ เขาไม่ใช่อย่างที่เห็น' }] },
+    { opp: 'bruno', stage: 'rooftop', title: 'Chapter 5 - The Bear', titleTH: 'บทที่ 5 - หมีเหล็ก', level: 3,
+      pre: [{ who: 'bruno', en: 'I am the loan shark\'s champion. Your gym is mine, little man. Lose gracefully.', th: 'ฉันคือแชมป์ของเจ้าหนี้ ค่ายของแกเป็นของฉันแล้ว ไอ้ตัวเล็ก แพ้ให้สวยๆ ซะ' }, { who: 'tawan', en: 'Size is not everything.', th: 'ขนาดตัวไม่ใช่ทุกอย่าง' }],
+      post: [{ who: 'bruno', en: 'Ugh... fine. The debt is cancelled. But the man behind the loan... he sits above the clouds.', th: 'อึก... ก็ได้ หนี้ยกเลิก แต่ตัวการเบื้องหลังเงินกู้... เขาอยู่เหนือเมฆ' }] },
+    { opp: 'kage', stage: 'ice', title: 'Chapter 6 - Frozen Peak', titleTH: 'บทที่ 6 - ยอดเขาน้ำแข็ง', level: 3,
+      pre: [{ who: 'kage', en: 'I was sent to end you. The master does not like fighters who ask questions.', th: 'ข้าถูกส่งมาปลิดชีพเจ้า นายท่านไม่ชอบนักสู้ที่ตั้งคำถาม' }],
+      post: [{ who: 'kage', en: 'You spared me... A debt of blood. The tower of the master is guarded by a machine.', th: 'เจ้าไว้ชีวิตข้า... เป็นหนี้เลือด หอคอยของนายท่านมีหุ่นจักรกลเฝ้าอยู่' }] },
+    { opp: 'kenzo', stage: 'volcano', title: 'Chapter 7 - The Storm Fist', titleTH: 'บทที่ 7 - กำปั้นพายุ', level: 4,
+      pre: [{ who: 'kenzo', en: 'I am the reigning champion. I have already seen the truth — and I have already lost to it. Prove that you can do more.', th: 'ข้าคือแชมป์ตัวจริง ข้าเห็นความจริงมาแล้ว... และแพ้มันมาแล้ว จงพิสูจน์ว่าเจ้าทำได้มากกว่านั้น' }],
+      post: [{ who: 'kenzo', en: 'Go. Take my strength with you. Destroy the seal in the throne room.', th: 'ไปเถอะ พาพลังของข้าไปด้วย ทำลายผนึกในห้องบัลลังก์' }] },
+    { opp: 'ironclad', stage: 'grid', title: 'Chapter 8 - The Iron Gate', titleTH: 'บทที่ 8 - ประตูเหล็ก', level: 4,
+      pre: [{ who: 'ironclad', en: 'UNAUTHORISED ENTRY. TERMINATION PROTOCOL: ENGAGED.', th: 'ตรวจพบผู้บุกรุก เริ่มโปรโตคอลกำจัด' }, { who: 'tawan', en: 'Machines have no fear. But they also have a switch.', th: 'เครื่องจักรไม่มีความกลัว แต่มันก็มีสวิตช์' }],
+      post: [{ who: 'narr', en: 'The Iron Gate collapses. The tower opens to a chamber of shadow and fire.', th: 'ประตูเหล็กพังทลาย หอคอยเปิดสู่ห้องแห่งเงามืดและเปลวเพลิง' }] },
+    { opp: 'asura', stage: 'throne', title: 'Final Chapter - Demon Throne', titleTH: 'บทสุดท้าย - บัลลังก์อสูร', level: 5,
+      pre: [{ who: 'asura', en: 'Hahaha! Another vessel for my power. Come, Thai fighter. Give me your strength!', th: 'ฮ่าๆๆ! ภาชนะพลังอีกใบ มาสิ นักสู้ไทย มอบพลังของเจ้าให้ข้า!' }, { who: 'tawan', en: 'My strength is not for sale. It belongs to everyone who fights beside me!', th: 'พลังของผมไม่ได้มีไว้ขาย มันเป็นของทุกคนที่ต่อสู้เคียงข้างผม!' }],
+      post: [{ who: 'narr', en: 'Asura shatters. The seals break and the captured fighters awaken - Marcus\'s brother among them.', th: 'อสุระแตกสลาย ผนึกพังทลาย นักสู้ที่ถูกจองจำตื่นขึ้น... น้องชายของมาร์คัสก็อยู่ท่ามกลางพวกเขา' }, { who: 'narr', en: 'Tawan returns to Bangkok. Under the railway bridge, the gym is alive with the sound of a hundred kids - and the iron bell rings.', th: 'ตะวันกลับกรุงเทพฯ ใต้สะพานรถไฟ ค่ายมวยคึกคักด้วยเสียงเด็กร้อยคน และระฆังเหล็กก็ดังขึ้น' }] },
+  ],
+  ending: [{ who: 'narr', en: 'THE END - Thank you for playing EFC!', th: 'จบบริบูรณ์ - ขอบคุณที่เล่น EFC!' }],
+};
+
+// short win / lose quotes for the results screen
+export const QUOTES = {
+  kenzo: [['Discipline beats talent.', 'วินัยเอาชนะพรสวรรค์'], ['The storm has passed.', 'พายุผ่านไปแล้ว']],
+  tawan: [['Eight limbs, one heart.', 'แปดอาวุธ หนึ่งหัวใจ'], ['For my gym!', 'เพื่อค่ายของผม!']],
+  meilan: [['Be like water.', 'จงเป็นดั่งสายน้ำ'], ['The dragon does not sleep.', 'มังกรไม่เคยหลับ']],
+  jaeho: [['Speed is everything!', 'ความเร็วคือทุกสิ่ง!'], ['Too slow.', 'ช้าเกินไป']],
+  marcus: [['Down for the count.', 'นับสิบแล้ว'], ['Float like a butterfly...', 'ลอยเหมือนผีเสื้อ...']],
+  bruno: [['Crushed.', 'บดขยี้'], ['Bear necessities!', 'พลังหมี!']],
+  luna: [['Dance with me!', 'มาเต้นด้วยกัน!'], ['The rhythm never lies.', 'จังหวะไม่เคยโกหก']],
+  kage: [['You never saw me.', 'เจ้าไม่เคยเห็นข้า'], ['Silence.', 'เงียบงัน']],
+  ironclad: [['TARGET NEUTRALISED.', 'เป้าหมายถูกกำจัด'], ['CALCULATING...', 'กำลังคำนวณ...']],
+  asura: [['Kneel.', 'คุกเข่าซะ'], ['Your soul is mine.', 'วิญญาณเจ้าเป็นของข้า']],
+};
