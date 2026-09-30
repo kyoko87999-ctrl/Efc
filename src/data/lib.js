@@ -184,9 +184,13 @@ export function buildMoves(prof = {}, ov = {}, add = [], drop = []) {
     }
     out.push(def);
   }
-  for (const a of add) out.push(a);
-  return out;
+  // character specific moves replace universal ones bound to the same command (and same requirement)
+  const kept = out.filter((d) => !d.cmd || !add.some((a) => a.cmd && normCmd(a.cmd) === normCmd(d.cmd) && (a.req || null) === (d.req || null)));
+  for (const a of add) kept.push(a);
+  return kept;
 }
+
+function normCmd(c) { return c.replace(/\s+/g, '').toLowerCase(); }
 
 // Generic Rage Art / Heat Smash / Rage Drive templates: characters supply the numbers + look
 export function rageArt(o = {}) {

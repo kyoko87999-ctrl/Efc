@@ -118,7 +118,7 @@ export function selectScreen(app, opts) {
   const grid = h('div', { class: 'grid' });
   const card = [h('div'), h('div')];
   const crumb = h('div', { class: 'crumb' });
-  const cols = 5;
+  const cols = 6;
   const tiles = roster.map((c, i) => {
     const t = h('div', { class: 'tile', style: { backgroundImage: app.portrait(c.id) ? `url(${app.portrait(c.id)})` : `linear-gradient(135deg, ${c.body.glow || '#345'}, #0b0e16)` } },
       h('div', { class: 'nm' }, pick(c, 'name').split(' ')[0]));
@@ -146,10 +146,10 @@ export function selectScreen(app, opts) {
     // clickable alt pills
     card.forEach((c, i) => c.querySelectorAll('.alt').forEach((a) => a.addEventListener('click', () => { alts[i] = +a.dataset.alt; refresh(); })));
     if (!hover || true) {
-      const defs = [{ id: side0, x: -1.9, alt: alts[0] || 0, custom: alts[0] === (app.list.find((c) => c.id === side0).alts || []).length + 1 ? save.data.custom[side0]?.custom : null }];
-      if (side1) defs.push({ id: side1, x: 1.9, alt: alts[1] });
+      const defs = [{ id: side0, x: -1.45, alt: alts[0] || 0, custom: alts[0] === (app.list.find((c) => c.id === side0).alts || []).length + 1 ? save.data.custom[side0]?.custom : null }];
+      if (side1) defs.push({ id: side1, x: 1.45, alt: alts[1] });
       else if (players === 2) defs.push({ id: side0, x: 60 });
-      app.setShowcase(defs.length > 1 ? defs : [defs[0], { id: side0, x: 60 }], { stage: 'rooftop', cam: [0, 1.5, 6.6], look: [0, 1.1, 0], fov: 32 });
+      app.setShowcase(defs.length > 1 ? defs : [defs[0], { id: side0, x: 60 }], { stage: 'rooftop', cam: [0, 1.25, 7.4], look: [0, 0.6, 0], fov: 32 });
       app.showcasePose(0, ST.INTRO);
       if (side1) app.showcasePose(1, ST.INTRO);
     }
@@ -395,7 +395,7 @@ export function optionsScreen(app, fromPause) {
   rebuild();
   const el = screen('dark', wrap, hint(tr(`${kbd('←→')} Change &nbsp; ${kbd('Q')}/${kbd('E')} Tab &nbsp; ${kbd('Esc')} Back`, `${kbd('←→')} เปลี่ยนค่า &nbsp; ${kbd('Q')}/${kbd('E')} เปลี่ยนแท็บ &nbsp; ${kbd('Esc')} ย้อนกลับ`)));
   const scr = {
-    el, overlay: true,
+    el, overlay: !!fromPause,
     nav(ev) {
       if (ev === 'tabL') { tab = (tab + tabs.length - 1) % tabs.length; rebuild(); audio.sfx('ui_move'); return true; }
       if (ev === 'tabR') { tab = (tab + 1) % tabs.length; rebuild(); audio.sfx('ui_move'); return true; }

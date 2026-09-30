@@ -68,7 +68,7 @@ export class Hud {
       this.parts[i].name.textContent = names[i];
       const r = opts.ranks?.[i];
       this.parts[i].rank.textContent = r || '';
-      this.parts[i].pips.innerHTML = '<i></i>'.repeat(match.rules.rounds);
+      this.parts[i].pips.innerHTML = opts.practice ? '' : '<i></i>'.repeat(Math.min(3, match.rules.rounds));
       this.el.pl[i].classList.remove('rage');
     });
     this.el.practice.hidden = !opts.practice;

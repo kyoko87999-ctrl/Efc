@@ -18,7 +18,7 @@ const moves = buildMoves(
     mv('hellbeam', 'd/f+2+3', 'Hell Beam', 'm', 24, 8, 30, 15, -14, 0, 'beam', { ht: 'stag', push: 1.0, hom: true, r: 0.3, aiWeight: 1.2 }),
     mv('blink', '3+4', 'Void Blink', 'm', 14, 1, 8, 0, 0, 0, 'stab', { noHit: true, noAI: true, inv: [[1, 14, 'all']], mv: [[1, 13, 2.6]], auto: { on: 'always', id: 'blinkhit', at: 15 }, aiWeight: 1.2 }),
     mv('blinkhit', null, 'Blink Strike', 'm', 4, 2, 22, 16, -12, 0, 'cross', { ht: 'launch', lvy: 0.16 }),
-    mv('wingsweep', 'f,f+1+2', 'Wing Slash', 'm', 21, 3, 34, 20, -17, 0, 'hook', { ht: 'kd', ws: true, wsDmg: 8, pc: [4, 20] }),
+    mv('wingsweep', 'wr+1+2', 'Wing Slash', 'm', 21, 3, 34, 20, -17, 0, 'hook', { ht: 'kd', ws: true, wsDmg: 8, pc: [4, 20] }),
     mv('soulrip', 'wr+2', 'Soul Rip', 'm', 14, 2, 24, 18, -13, 0, 'palm', { ht: 'stag', mv: [[1, 12, 0.9]] }),
     rageArt({ name: 'Judgment Day', first: 12, hits: [6, 8, 10, 12, 14, 18, 22], after: 'kd', pre: 'cross', script: 'rageA', spacing: 9, an: { seq: ['hR', 'hL', 'fR', 'hR', 'hL', 'fL'], finish: 'hR' } }),
     heatSmash({ name: 'Abyss Crush', hits: [10, 12, 22], an: { seq: ['hR', 'hL'], finish: 'hR' } }),
