@@ -1,7 +1,7 @@
 // Attack poses: base stance + strike style (strikes.js) + the reach spec that lets the solver bring the striking limb to the
 // point the simulation says it hits.
-import { set3, add3, lerpPose, copyPose, syncPoles } from './pose.js';
-import { applyStyle, STY } from './strikes.js';
+import { lerpPose, copyPose, syncPoles } from './pose.js';
+import { applyStyle } from './strikes.js';
 import { stand, crouch, lying, snap, tf, cl01 } from './poses.js';
 import { scriptPose } from './scripts.js';
 import { REACH } from './reach.js';
@@ -42,7 +42,6 @@ export function attackPose(C, P) {
   if (m.style === 'grab' && m.grab && f.mf >= m.st && f.grabbing) { scriptPose(C, P, m, mf); return P; }
   const pt = applyStyle(S);
   // special shapes
-  const sty = STY[m.style];
   if (m.style === 'burst') {
     P._r.hL = [-pt[0] - 0.14, pt[1] - 0.02, pt[2]]; P._r.hR = [pt[0] + 0.14, pt[1] - 0.02, pt[2]];
     C.pin.hL = C.pin.hR = true; P.fist = [0.2, 0.2];
@@ -91,6 +90,5 @@ export function attackPose(C, P) {
   }
   else if (limb === 'sh') P.reach = { key: sd < 0 ? 'hL' : 'hR', target: pt, reach: 0.03 };
   else if (limb === 'hd') P.reach = { key: 'hd', target: pt, reach: 0.04 };
-  void sty;
   return P;
 }

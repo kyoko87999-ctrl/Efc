@@ -1,7 +1,7 @@
 // Procedural animation layers that sit on top of the state poses: breathing, weight shift, head look-at,
 // facial expression and limb inertia ("lag").  All of them are additive and cheap.
 import { ST } from '../sim/fighter.js';
-import { clamp, DEG } from '../util.js';
+import { clamp } from '../util.js';
 
 const TAU = Math.PI * 2;
 

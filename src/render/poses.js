@@ -78,10 +78,8 @@ export function idlePose(C, P) {
   if (f.stance && C.ch.stances && C.ch.stances[f.stance]) { stand(C, P); stancePose(C, P, C.ch.stances[f.stance]); return P; }
   if (f.crouch) crouch(C, P, 1); else stand(C, P);
   if (f.crouch) C.gait.mode = 'lock';
-  const hi = (f.guard && !f.crouch) || f.guard === 'crouch';
   if (f.guard && !f.crouch) { P._r.hL = [-0.13, 1.5, 0.38]; P._r.hR = [0.10, 1.43, 0.36]; add3(P.spine, 4, 0, 0); P.fist = [0.8, 0.8]; P.elbowPole = [0.4, -0.9, -0.1]; }
   if (f.guard === 'crouch') { P._r.hL = [-0.13, 1.12, 0.38]; P._r.hR = [0.1, 1.06, 0.36]; P.fist = [0.8, 0.8]; }
-  void hi;
   if (!f.crouch && (f.walkDir || f.sideWalk)) {
     const w = f.walkDir;
     if (w) { add3(P.spine, w > 0 ? 3.5 : -2, 0, 0); add3(P.hips, 0, 0, 0.012 * w); add3(P.hipsRot, w > 0 ? 1.5 : -1, 0, 0); C.gait.amt = 0.35; C.gait.T = w > 0 ? 8 : 9; }
@@ -200,7 +198,7 @@ export function hitPose(C, P) {
   const big = hk.heavy ? 1.3 : 1;
   const sdir = hk.side === 'l' ? 1 : hk.side === 'r' ? -1 : 0;
   // hold the stagger, relax over the last frames of the stun so the recovery blends into the guard
-  const w = smooth(clamp((f.stun - C.sub * 0) / 10, 0, 1));
+  const w = smooth(clamp(f.stun / 10, 0, 1));
   const R = C.R;
   stand(C, P);
   C.gait.mode = C.speed > 0.045 ? 'slide' : 'lock'; C.gait.settle = 0.28;
@@ -430,7 +428,6 @@ export function introPose(C, P) {
   const t = showT(C);
   const style = C.ch.intro || 'fists';
   stand(C, P);
-  const R = C.R;
   const full = f.introFirst;                 // rounds after the first only get a short "ready" gesture
   if (t < 0) return P;
   if (!full) {
@@ -453,7 +450,6 @@ export function introPose(C, P) {
   } else if (style === 'roar') {
     const load = trk(t, [[0, 0], [10, 1], [18, 0]]);
     const burst = trk(t, [[10, 0], [19, 1], [44, 1], [54, 0]]);
-    const pound = pulse(t, 24, 31) + pulse(t, 31, 38) * 1;
     P.hips[1] -= 0.14 * load; add3(P.spine, 16 * load - 24 * burst, 0, 0); add3(P.head, -30 * burst + 8 * load, 0, 0);
     P._r.hL = mix(P._r.hL, [-0.78, 1.42, 0.02], burst); P._r.hR = mix(P._r.hR, [0.78, 1.42, 0.02], burst);
     // chest beating
@@ -461,9 +457,8 @@ export function introPose(C, P) {
     P._r.hL = mix(P._r.hL, [-0.12, 1.28, 0.24], pl); P._r.hR = mix(P._r.hR, [0.12, 1.28, 0.24], pr);
     add3(P.spine, 3 * (pl + pr), 0, 0);
     P.shL[1] += 0.04 * burst; P.shR[1] += 0.04 * burst; P.fist = [0.95, 0.95];
-    P.hips[1] += 0.0; void pound;
     C.face.mouth = burst * 0.95; C.face.brow = 0.9; C.face.squint = 0.4 * burst;
-    if (rig_wings(C)) C.wings = 0.4 + 0.6 * burst;
+    if (C.hasWings) C.wings = 0.4 + 0.6 * burst;
   } else if (style === 'taunt') {
     const w = trk(t, [[0, 0], [8, 1], [40, 1], [52, 0]]);
     P._r.hL = mix(P._r.hL, [-0.1, 1.18, 0.62], w); P._r.hR = mix(P._r.hR, [0.26, 0.98, 0.06], w);
@@ -485,14 +480,11 @@ export function introPose(C, P) {
   C.mark(P);
   return P;
 }
-const rig_wings = (C) => !!C.hasWings;
-
 export function winPose(C, P) {
   const f = C.f;
   const t = tf(C, f.stT);
   const style = C.ch.win || 'fist';
   stand(C, P);
-  const hold = trk(t, [[110, 1], [150, 0.4]]);
   if (style === 'bow') {
     const bow = trk(t, [[22, 0], [46, 1], [84, 1], [108, 0]]);
     const salute = trk(t, [[8, 0], [22, 1], [108, 1], [124, 0]]);
@@ -521,7 +513,7 @@ export function winPose(C, P) {
     P._r.hL = mix(P._r.hL, [-0.82, 1.5, 0.0], b); P._r.hR = mix(P._r.hR, [0.82, 1.5, 0.0], b);
     P._r.hL = mix(P._r.hL, [-0.12, 1.28, 0.24], cl01(pl)); P._r.hR = mix(P._r.hR, [0.12, 1.28, 0.24], cl01(pr));
     add3(P.spine, -22 * b, 0, 0); add3(P.head, -26 * b, 0, 0); P.hips[1] -= 0.02 * b; P.shL[1] += 0.05 * b; P.shR[1] += 0.05 * b;
-    P.fist = [0.95, 0.95]; C.face.mouth = 0.9 * b * (1 - 0.5 * hold * 0 ); C.face.brow = 0.9;
+    P.fist = [0.95, 0.95]; C.face.mouth = 0.9 * b; C.face.brow = 0.9;
   } else {
     // fist pump
     const up = trk(t, [[8, 0], [20, 1], [120, 1], [140, 0.2]]);

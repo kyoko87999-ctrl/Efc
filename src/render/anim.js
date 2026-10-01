@@ -19,7 +19,7 @@ import { carryHands } from './carry.js';
 import { statePose } from './poses.js';
 import { attackPose } from './attacks.js';
 import { ST } from '../sim/fighter.js';
-import { Rng, clamp, DEG } from '../util.js';
+import { Rng, clamp } from '../util.js';
 
 const MIN_ARM = 0.27;
 const ROOT0 = { x: 0, y: 0, z: 0, yaw: 0, sc: 1, vx: 0, vz: 0, teleport: false };

@@ -5,7 +5,6 @@
 //   * the limb accelerates into the target (the sim's own approach curve decelerates), retracts quickly, the body settles slower
 //   * support foot pivots, heel lifts, weight shifts; free arm balances; hand / foot shapes
 // During the active frames the limb path is exactly the simulation's (P -> Q), so the visuals cannot disagree with the hit volume.
-import { add3, set3 } from './pose.js';
 import { clamp, easeInOut, vlerp } from '../util.js';
 
 const sm = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
