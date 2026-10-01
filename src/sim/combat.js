@@ -158,6 +158,8 @@ export function applyHit(match, r) {
   const stunNormal = counter ? m.chStun : m.hitStun;
   const hk = { lv: m.lv, side: m.side, heavy, ws: m.ws, counter, fx: att.fx, fz: att.fz };
   const wasAir = def.state === ST.AIR || def.state === ST.WALL;
+  def.noteImpact('hit', { lv: m.lv, side: m.side, dmg, counter, heavy, dx: away.x, dz: away.z, launch: ht === 'launch' || ht === 'tornado' || ht === 'screw', limb: m.limb });
+  att.noteStrike(true);
 
   if (def.hp <= 0) {
     match.koHit(def, att, m, away, hs);
@@ -258,6 +260,8 @@ function applyBlock(match, r) {
   att.hitDone = true; att.contact = 'block';
   const crouch = def.guard === 'crouch';
   const away = awayVec(att);
+  def.noteImpact('block', { lv: m.lv, side: m.side, dmg: m.dmg, counter: false, heavy: m.dmg >= 15, dx: away.x, dz: away.z, limb: m.limb });
+  att.noteStrike(false);
   def.enterBlock(m.blkStun, crouch, m.lv);
   def.vx = away.x * m.pushBV; def.vz = away.z * m.pushBV;
   att.vx = -away.x * m.pushBV * 0.35; att.vz = -away.z * m.pushBV * 0.35;
@@ -277,6 +281,7 @@ function applyPowerCrush(match, r) {
   const dmg = Math.max(1, Math.round(m.dmg * 0.8));
   applyDamage(match, def, att, dmg, false);
   def.addRec(dmg * 0.4);
+  { const aw = awayVec(att); def.noteImpact('hit', { lv: m.lv, side: m.side, dmg, counter: false, heavy: false, dx: aw.x, dz: aw.z, crush: true, limb: m.limb }); att.noteStrike(true); }
   match.hitstop = Math.max(match.hitstop, 5);
   match.emit({ t: 'hit', pos, kind: 'med', counter: false, punish: false, lv: m.lv, dmg, att: att.idx, def: def.idx, pcrush: true });
   match.emit({ t: 'text', who: def.idx, text: 'powercrush' });

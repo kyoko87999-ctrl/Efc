@@ -8,26 +8,26 @@
     },
     {
       "name": "walk fwd",
-      "slipPerSec": 1.3294005391174188,
-      "maxStepCm": 7.626040915326149,
+      "slipPerSec": 0.532016112519486,
+      "maxStepCm": 4.387016664864651,
       "frames": 180
     },
     {
       "name": "walk back",
-      "slipPerSec": 1.2495904159852742,
-      "maxStepCm": 7.989311589387782,
+      "slipPerSec": 0.6088715276547487,
+      "maxStepCm": 3.6763825748446166,
       "frames": 180
     },
     {
       "name": "sidewalk",
-      "slipPerSec": 2.877260125775247,
+      "slipPerSec": 2.510198314490015,
       "maxStepCm": 15.637395498405251,
       "frames": 190
     },
     {
       "name": "run",
-      "slipPerSec": 2.3786257957167494,
-      "maxStepCm": 41.38676589376617,
+      "slipPerSec": 2.0883432437004346,
+      "maxStepCm": 16.70461063332384,
       "frames": 184
     },
     {

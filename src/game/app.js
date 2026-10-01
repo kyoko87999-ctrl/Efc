@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { GameView, FighterView } from '../render/scene.js';
 import { Rig, mergeBody } from '../render/rig.js';
 import { newPose, finalize } from '../render/pose.js';
-import { buildPose } from '../render/anim.js';
+import { Puppet } from '../render/puppet.js';
 import { Hud } from '../ui/hud.js';
 import { UI, h, $, toast } from '../ui/kit.js';
 import { tr, pick, setLang, getLang } from '../ui/i18n.js';
@@ -129,14 +129,17 @@ export class App {
 
   renderPortrait(r, scene, cam, ch, cust) {
     const alt = ch.alts && cust?.alt != null && cust.alt > 0 ? ch.alts[cust.alt - 1] : null;
-    const rig = new Rig(mergeBody(ch.body, alt, cust?.custom));
-    const fake = { state: ST.IDLE, stT: 0, sc: 1, crouch: false, guard: null, walkDir: 0, sideWalk: 0, walkPhase: 0, idx: 0, move: null, stance: null };
+    const fake = { state: ST.IDLE, stT: 0, sc: ch.body.scale || 1, crouch: false, guard: null, walkDir: 0, sideWalk: 0, walkPhase: 0, idx: 0, move: null, stance: null,
+      x: 0, y: 0, z: 0, px: 0, py: 0, pz: 0, fx: 0, fz: 1, pfx: 0, pfz: 1, hp: 1, maxHp: 1, heat: { on: false }, vy: 0, match: { hitstop: 0 } };
     const cc = this.compiled[ch.id];
-    const P = buildPose({ f: fake, ch: cc, R: cc.rest, T: 0, frac: 0 });
-    void newPose; void finalize;
-    rig.apply(P);
+    const pup = new Puppet(fake, cc, cust);
+    pup.update(1, 0, 1, false);
+    pup.update(1, 0, 1, false);
+    const rig = pup.rig;
+    void alt;
     rig.root.scale.setScalar(ch.body.scale || 1);
-    rig.root.rotation.y = 0.5;
+    rig.root.position.set(0, 0, 0);
+    rig.root.rotation.set(0, 0.5, 0);
     scene.add(rig.root);
     scene.background = new THREE.Color(ch.body.glow || '#334');
     scene.background.multiplyScalar(0.35);

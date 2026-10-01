@@ -19,6 +19,8 @@ import { NEUTRAL, inp } from './helpers.mjs';
 
 const args = process.argv.slice(2);
 const QUICK = args.includes('--quick');
+const SHOW_POPS = args.includes('--pops');
+const popLog = [];
 const jsonOut = args.includes('--json') ? args[args.indexOf('--json') + 1] : null;
 const COMPILED = new Map(CHARS.map((c) => [c.id, compileChar(c)]));
 const V = THREE.Vector3;
@@ -46,11 +48,11 @@ function arena(a, b, { dist = 2.7, rules = {} } = {}) {
 }
 
 const tmp = new V(), tmp2 = new V();
-const FOOT_PTS = [[0, -0.065, -0.06], [0, -0.065, 0.17]];      // heel / ball in ankle-local space (old foot geometry)
+const FOOT_PTS = [[0, -0.065, -0.06], [0, -0.065, 0.17]];      // heel / ball in ankle-local space (legacy foot geometry)
 function footPoints(p, side) {
   const rig = p.rig;
   const j2 = rig.limbs[side === 0 ? 'fL' : 'fR'].j2;
-  const pts = rig.footPoints ? rig.footPoints(side) : FOOT_PTS;
+  const pts = (rig.footPoints ? rig.footPoints(side) : FOOT_PTS).slice(0, 2);
   return pts.map((q) => j2.localToWorld(tmp.set(q[0], q[1], q[2])).toArray());
 }
 const anchor = (p, name) => p.rig.anchorWorld(name, new V()).toArray();
@@ -59,6 +61,8 @@ const dxz = (a, b) => Math.hypot(a[0] - b[0], a[2] - b[2]);
 // ------------------------------------------------------------------ footSlip
 function slipScenario(name, script, who = 0) {
   const c = arena('kenzo', 'tawan', { dist: 5 });
+  // a sample point counts as "on the floor" when it is within 1.5 cm of its height while standing still (rig independent)
+  const rest = [0, 1].map((s) => footPoints(c.pup[who], s).map((p) => p[1]));
   let prev = null, slip = 0, contactFrames = 0, maxStep = 0, frames = 0;
   for (const [n, i0] of script) {
     for (let k = 0; k < n; k++) {
@@ -67,7 +71,8 @@ function slipScenario(name, script, who = 0) {
       const cur = [0, 1].map((s) => footPoints(c.pup[who], s));
       if (prev) {
         for (let s = 0; s < 2; s++) for (let q = 0; q < cur[s].length; q++) {
-          if (cur[s][q][1] < 0.02 && prev[s][q][1] < 0.02) { const d = dxz(cur[s][q], prev[s][q]); slip += d; contactFrames++; if (d > maxStep) maxStep = d; }
+          const lim = rest[s][q] + 0.015;
+          if (cur[s][q][1] < lim && prev[s][q][1] < lim) { const d = dxz(cur[s][q], prev[s][q]); slip += d; contactFrames++; if (d > maxStep) maxStep = d; }
         }
       }
       prev = cur;
@@ -159,7 +164,7 @@ function fightMetrics(games, frames) {
     const A = CHARS[g % CHARS.length].id, B = CHARS[(g * 3 + 1) % CHARS.length].id;
     const c = arena(A, B, { dist: 2.7, rules: { time: 0 } });
     const brains = [new CpuBrain(0, 3, g + 1), new CpuBrain(1, 3, g + 7)];
-    const prevQ = [null, null], prevD = [null, null], prevKey = ['', ''];
+    const prevQ = [null, null], prevD = [null, null], prevKey = ['', ''], jarg = [0, 0], jhist = [[], []], snap = [[], []];
     const hist = [[], []];            // per fighter: per-frame max joint delta
     const pending = [[], []];         // transitions waiting for their 3-frame look-ahead
     for (let f = 0; f < frames; f++) {
@@ -173,13 +178,14 @@ function fightMetrics(games, frames) {
         let dmax = 0;
         if (prevQ[i]) {
           const d = qs.map((q, k) => angBetween(q, prevQ[i][k]));
-          dmax = Math.max(...d);
+          dmax = Math.max(...d); jarg[i] = d.indexOf(dmax);
           if (prevD[i]) { const acc = d.map((x, k) => Math.abs(x - prevD[i][k])); jerks.push(Math.max(...acc)); }
           prevD[i] = d;
         }
-        hist[i].push(dmax);
+        hist[i].push(dmax); jhist[i].push(jarg[i]);
+        if (SHOW_POPS) { const P = p.anim.P, fx = (a) => a.map((x) => x.toFixed(2)).join(','); (snap[i] = snap[i] || []).push(`${hist[i].length} ${key} hL ${fx(P.hL)} r ${fx(P._r.hL)} pole ${fx(P.elbowPole)}/${fx(P.elbowPoleS)} ${P.strikeArm} hips ${fx(P.hips)} rot ${fx(P.hipsRot)} sp ${fx(P.spine)} ch ${fx(P.chest)} shL ${fx(P.shL)} d ${dmax.toFixed(0)}`); }
         const n = hist[i].length;
-        if (prevQ[i] && key !== prevKey[i] && n > 8) pending[i].push(n);        // transition frame index
+        if (prevQ[i] && key !== prevKey[i] && n > 8) { pending[i].push(n); pending[i].info = pending[i].info || []; pending[i].info.push(prevKey[i] + ' -> ' + key); }        // transition frame index
         prevQ[i] = qs; prevKey[i] = key;
         // resolve transitions whose next 3 frames are known
         while (pending[i].length && n >= pending[i][0] + 3) {
@@ -187,6 +193,7 @@ function fightMetrics(games, frames) {
           const post = Math.max(...hist[i].slice(t - 1, t + 3));                 // the transition frame and the next three
           const before = Math.max(...hist[i].slice(t - 5, t - 1));
           pops.push(post); pre.push(before);
+          if (SHOW_POPS) { const w = hist[i].slice(t - 1, t + 3); const jj = jhist[i][t - 1 + w.indexOf(Math.max(...w))]; if (post - before > 150) console.log('POP ' + (post - before).toFixed(0) + '\n' + snap[i].slice(t - 1, t + 4).join('\n')); popLog.push({ post, before, tr: pending[i].info.shift() + ' joint=' + ['body', 'spine', 'chest', 'head', 'hL.j0', 'hR.j0', 'hL.j1', 'hR.j1', 'fL.j0', 'fR.j0', 'fL.j1', 'fR.j1'][jj] + ' f=' + t }); }
         }
         if (n > 8 && !pending[i].length) steady.push(dmax);
         // head aim in neutral states
@@ -250,6 +257,7 @@ console.log('\n=== life while standing ===');
 console.log('chest RMS motion', f2(result.life.chestRmsCm), 'cm   head turn', f2(result.life.headTurnDegPerSec), 'deg/s');
 console.log('\n=== AI fights (', QUICK ? 4 : 10, 'matches ) ===');
 console.log(JSON.stringify(Object.fromEntries(Object.entries(result.fights).map(([k, v]) => [k, +v.toFixed(3)]))));
+if (SHOW_POPS) { const rows = popLog.map((p) => ({ ...p, ex: p.post - p.before })).sort((a, b) => b.ex - a.ex).slice(0, 25); console.log('\n=== worst pops ===\n' + rows.map((r) => `${r.ex.toFixed(0).padStart(4)}  (${r.before.toFixed(0)} -> ${r.post.toFixed(0)})  ${r.tr}`).join('\n')); }
 console.log('\n=== strike reach: intended strike point vs where the limb really is ===');
 console.log(JSON.stringify(Object.fromEntries(Object.entries(result.reach).map(([k, v]) => [k, typeof v === 'number' ? +v.toFixed(2) : v]))));
 console.log(`\nelapsed ${((Date.now() - t0) / 1000).toFixed(1)}s`);

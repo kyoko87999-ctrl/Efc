@@ -238,4 +238,5 @@ export function applyStrike(S) {
     }
     default: break;
   }
+  return pt;
 }

@@ -64,11 +64,6 @@ export class FighterView {
     const f = this.f, rig = this.rig;
     this.puppet.update(alpha, T, dtF, freeze);
     const { x, z } = this.puppet.pos;
-    // hair / scarf sway
-    if (rig.hairTail) rig.hairTail.rotation.x = 0.15 + Math.sin(T * 3) * 0.06 + (f.walkDir ? 0.15 : 0);
-    if (rig.scarfTail) rig.scarfTail.rotation.x = -0.15 + Math.sin(T * 4) * 0.12;
-    if (rig.wings) rig.wings.forEach((w, i) => { w.rotation.y = (i ? -1 : 1) * (0.55 + Math.sin(T * 2 + i) * 0.1); });
-
     // colour effects
     let tintC = null, tintA = 0;
     if (f.flash > 0) { tintC = '#ffffff'; tintA = f.flash / 6 * 0.7; }

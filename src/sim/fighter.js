@@ -85,6 +85,8 @@ export class Fighter {
     this.stats = this.stats || { dmg: 0, maxCombo: 0, throws: 0, counters: 0, punishes: 0, heats: 0, rages: 0, walls: 0, hits: 0, whiffs: 0 };
     this.startupSeen = 0;
     this.vis = { pushT: 0, dir: 0 };
+    this.strike = null;        // render-only: result of this fighter's last strike (contact feedback)
+    this.impact = null;        // render-only: last hit / block that landed on this fighter (drives the reaction springs)
   }
 
   // ------------------------------------------------------------------ input
@@ -637,6 +639,10 @@ export class Fighter {
   }
 
   // ---- reactions
+  // render-only impact record (does not influence the simulation)
+  noteStrike(hit) { this.strikeSeq = (this.strikeSeq | 0) + 1; this.strike = { seq: this.strikeSeq, hit }; }
+  noteImpact(kind, info) { this.impactSeq = (this.impactSeq | 0) + 1; this.impact = { seq: this.impactSeq, kind, ...info }; }
+
   enterHit(kind, stun, hk) {
     this.state = ST.HIT; this.stT = 0; this.stun = stun; this.stunTotal = stun;
     this.hk = { kind, ...hk };
