@@ -4,8 +4,9 @@ import { Rig, mergeBody } from './rig.js';
 import { Animator } from './anim.js';
 import * as THREE from 'three';
 import { lerp, angleDiff, DEG } from '../util.js';
+import { ST } from '../sim/fighter.js';
 
-const _e = new THREE.Euler(0, 0, 0, 'YXZ'), _v = new THREE.Vector3(), _w = new THREE.Vector3(), _Y = new THREE.Vector3(0, 1, 0);
+const _p = new THREE.Vector3(), _e = new THREE.Euler(0, 0, 0, 'YXZ'), _v = new THREE.Vector3(), _w = new THREE.Vector3(), _Y = new THREE.Vector3(0, 1, 0);
 
 export class Puppet {
   constructor(f, ch, cust) {
@@ -42,10 +43,29 @@ export class Puppet {
     rig.root.position.set(x + jx + ox, y + P.rootY + oy, z + jz + oz);
     rig.root.rotation.set(P.rootPitch * DEG, yaw + P.rootYaw * DEG, P.rootRoll * DEG);
     rig.root.scale.set(R.sc / Math.sqrt(q), R.sc * q, R.sc / Math.sqrt(q));
+    // bodies thrown / dropped / rolled by the simulation must not sink into the floor
+    const st = f.state;
+    if (st === ST.GRAB || st === ST.AIR || st === ST.WALL || st === ST.GETUP || st === ST.DOWN || st === ST.KO) this.floorFix(R.sc);
     this.pos.x = x; this.pos.y = y; this.pos.z = z; this.pos.yaw = yaw;
     // spring chains (hair, tails, belts, wings) need the final world transform
     rig.dynamics(dtF / 60, R.sc, jump);
     return P;
+  }
+
+  // lift the whole rig if a joint (with its limb radius) is below the floor
+  floorFix(sc) {
+    const rig = this.rig, root = rig.root;
+    root.updateMatrixWorld(true);
+    let lift = 0;
+    const chk = (obj, min) => { obj.getWorldPosition(_p); const d = min * sc - _p.y; if (d > lift) lift = d; };
+    chk(rig.head, 0.11); chk(rig.chest, 0.10); chk(rig.body, 0.10);
+    for (const k of ['hL', 'hR']) { chk(rig.limbs[k].j2, 0.05); chk(rig.limbs[k].j1, 0.05); }
+    for (const k of ['fL', 'fR']) {
+      chk(rig.limbs[k].j1, 0.06);
+      const j2 = rig.limbs[k].j2;
+      for (const q of rig.footPoints(k === 'fL' ? 0 : 1)) { _p.set(q[0], q[1], q[2]); j2.localToWorld(_p); const d = -0.005 * sc - _p.y; if (d > lift) lift = d; }
+    }
+    if (lift > 1e-4) { root.position.y += lift; root.updateMatrixWorld(true); }
   }
 
   dispose() { this.rig.dispose(); }

@@ -110,9 +110,39 @@ Node scripts in `tests/` (all headless, no browser needed):
 ### Architecture
 - `src/sim/` — deterministic 60 Hz simulation (fighter state machine, hit/hurt capsules, combat rules, match/rounds, AI). No rendering, no randomness.
 - `src/data/` — move definitions (`lib.js` presets + universal moves), 10 character files, roster.
-- `src/render/` — Three.js rig with IK, poses & animation scripts, stages, camera director, particle FX.
+- `src/render/` — Three.js rig with IK, the procedural animation pipeline (see below), stages, camera director, particle FX.
 - `src/ui/`, `src/game/` — DOM HUD and menus, game modes, story, tutorial, save data.
 - `src/input/`, `src/audio/` — keyboard/gamepad/touch and WebAudio synthesis.
+
+### Animation system / ระบบแอนิเมชัน
+The characters are animated procedurally (no clips): every frame the simulation state is turned into a pose and passed through a pipeline
+(`src/render/anim.js`) that fixes the things keyframed clips cannot — feet stuck to the floor, limbs that really reach the hit volume,
+no cross-fades, reactions that depend on the hit.
+
+| Stage | Module | What it does |
+|---|---|---|
+| Rig v2 | `rig.js`, `skel.js` | pelvis · spine · chest · neck · head, clavicles, hands (palm / fingers / thumb), feet (heel + hinged toe), face (eyes with gaze, lids, brows, mouth), VRM-style spring chains for hair, scarves, belts, tails, wings |
+| State poses | `poses.js`, `attacks.js`, `scripts.js` | stances, locomotion, blocks, hit / air / down / get-up / wall / throw victims, intros, victories, defeats, throw scripts |
+| Strikes | `strikes.js` | kinetic chain (pelvis → spine → shoulder → hand), anticipation, accelerating approach, foot pivots, chambers, hand / foot shapes; the limb path in the active frames is exactly the simulation's hit volume |
+| Hand carry | `carry.js` | guard hands travel with the torso instead of hanging in the air |
+| Inertialization | `inertia.js` | state changes never cross-fade: offset + velocity of the old motion decay with a critically damped spring |
+| Layers | `layers.js` | breathing + weight shift, look-at (head + eyes), blinking / expressions, idle fidgets, limb lag |
+| Reactions | `react.js` | damped springs kicked by every hit / block (whip, overshoot, settle); attacker recoil; squash and stretch |
+| Foot planting | `stepper.js` | feet are pinned in the world; steps are generated from root motion (walk, run, dash, side-steps, push-back) |
+| Reach solver | `reach.js` | lunge / twist / lean just enough that the striking limb touches the point the simulation hits (punches, kicks, knees, elbows, shoulders, head) |
+
+Render-only: nothing in the pipeline feeds back into the 60 Hz simulation (the sim only records additive `impact` / `strike` notes for the animator),
+so replays and determinism are untouched.  Cost: ~0.1 ms per fighter per frame.
+
+Measure it (headless):
+
+| Script | What it measures |
+|---|---|
+| `node tests/anim_metrics.mjs [--json out.json] [--quick] [--pops]` | foot slip, contact miss (limb vs hit volume for all 387 moves), head aim, state-change pops, jerk |
+| `node tests/anim_compare.mjs tests/anim_baseline.json out.json` | before / after table against the previous animator |
+| `node tests/anim_sanity.mjs [matches] [frames] [render-subdivision]` | finite poses, nothing leaves the arena, grounded feet stay above the floor (also at 180 Hz rendering) |
+| `node tests/anim_moves.mjs [char]` | every move of every fighter (throws and rage arts included) animates cleanly |
+| `node tools/animlab.mjs`, `movesheet.mjs`, `reactsheet.mjs`, `showsheet.mjs` | contact sheets of moves, reactions, intros / victories from any camera |
 
 ## ข้อจำกัด / Known limitations
 - Local multiplayer only (no online / rollback netcode).

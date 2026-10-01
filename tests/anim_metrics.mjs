@@ -100,6 +100,28 @@ function worldOfLocal(p, v) {
   return p.rig.root.localToWorld(tmp2.set(-v[0], v[1], v[2])).toArray();
 }
 
+// world points of the striking part of a limb (hands: wrist; feet: ankle + ball + toe; knees / elbows: the joint; shoulder / head: the joint)
+const FOOT_FALLBACK = [[0, -0.065, -0.06], [0, -0.065, 0.17]];
+function strikePoints(p, limb) {
+  const rig = p.rig, out = [];
+  const L = (k) => rig.limbs[k];
+  if (limb === 'sh') { out.push(L('hR').j0.getWorldPosition(new V()), L('hL').j0.getWorldPosition(new V()), rig.anchorWorld('chest', new V())); return out; }
+  if (limb === 'hd') { out.push(rig.anchorWorld('head', new V())); return out; }
+  if (limb[0] === 'f') {
+    const j2 = L(limb).j2, pts = rig.footPoints ? rig.footPoints(limb === 'fL' ? 0 : 1) : FOOT_FALLBACK;
+    out.push(j2.getWorldPosition(new V()));
+    for (const q of pts) out.push(j2.localToWorld(new V(q[0], q[1], q[2])));
+    return out;
+  }
+  out.push(rig.anchorWorld(limb, new V()));
+  return out;
+}
+function segDist(p, a, b) {
+  const ab = b.clone().sub(a), ap = p.clone().sub(a), l2 = ab.lengthSq();
+  const t = l2 > 1e-9 ? Math.max(0, Math.min(1, ap.dot(ab) / l2)) : 0;
+  return p.distanceTo(a.clone().add(ab.multiplyScalar(t)));
+}
+
 // Drive a move through the sim with the AI's input macros and sample the limb every active frame.
 function reachMove(def, mv) {
   const c = arena(def.id, def.id === 'bruno' ? 'kenzo' : 'bruno', { dist: 6 });
@@ -112,7 +134,7 @@ function reachMove(def, mv) {
   if (mv.ctx && mv.ctx.startsWith('st:')) { const e = COMPILED.get(def.id).moveList.find((x) => x.toStance === mv.ctx.slice(3)); if (e) seq.push(e); }
   seq.push(mv);
   let idx = 0, active = null;
-  const errs = [], firstErr = [];
+  const errs = [], firstErr = [], misses = [], firstMiss = [];
   for (let f = 0; f < 480; f++) {
     let raw = NEUTRAL;
     if (a.state === ST.IDLE && a.lock <= 0 && brain.q.length === 0 && idx < seq.length) { brain.pressMove(seq[idx]); idx++; }
@@ -127,6 +149,12 @@ function reachMove(def, mv) {
         const e = Math.hypot(want[0] - got[0], want[1] - got[1], want[2] - got[2]) / (a.sc || 1);
         errs.push(e);
         if (mf === m.st) firstErr.push(e);
+        // contact miss: distance of the striking part to the hit volume (capsule P-Q, radius r) the simulation uses
+        const cap = a.moveCapsule(m);
+        const ca = new V(...cap.a), cb = new V(...cap.b);
+        const miss = Math.max(0, Math.min(...strikePoints(c.pup[0], m.limb).map((q) => segDist(q, ca, cb))) - cap.r) / (a.sc || 1);
+        misses.push(miss);
+        if (mf === m.st) firstMiss.push(miss);
       }
       active = m;
     }
@@ -134,7 +162,7 @@ function reachMove(def, mv) {
     if (idx >= seq.length && a.state === ST.IDLE && a.lock <= 0 && brain.q.length === 0 && f > 30 && active) break;
   }
   if (!errs.length) return null;
-  return { id: mv.id, first: firstErr[0] ?? errs[0], mean: errs.reduce((s, x) => s + x, 0) / errs.length, max: Math.max(...errs) };
+  return { id: mv.id, limb: mv.limb, style: mv.style, miss: firstMiss[0] ?? misses[0], missMean: misses.reduce((s, x) => s + x, 0) / misses.length, first: firstErr[0] ?? errs[0], mean: errs.reduce((s, x) => s + x, 0) / errs.length, max: Math.max(...errs) };
 }
 
 function reachAll(ids) {
@@ -245,11 +273,15 @@ const mean = (arr) => arr.length ? arr.reduce((s, x) => s + x, 0) / arr.length :
 result.reach = {
   moves: rows.length,
   firstFrameMeanCm: mean(rows.map((r) => r.first)) * 100, firstFrameP90Cm: pct(rows.map((r) => r.first), 0.9) * 100, firstFrameMaxCm: Math.max(...rows.map((r) => r.first)) * 100,
+  missFirstMeanCm: mean(rows.map((r) => r.miss)) * 100, missActiveMeanCm: mean(rows.map((r) => r.missMean)) * 100, missFirstP90Cm: pct(rows.map((r) => r.miss), 0.9) * 100, missOver1cm: rows.filter((r) => r.miss > 0.01).length, missOver5cm: rows.filter((r) => r.miss > 0.05).length, missWorst: rows.slice().sort((a, b) => b.miss - a.miss).slice(0, 6).map((r) => `${r.char}:${r.id} ${(r.miss * 100).toFixed(0)}cm`),
   activeMeanCm: mean(rows.map((r) => r.mean)) * 100, activeMaxCm: Math.max(...rows.map((r) => r.max)) * 100,
   over5cm: rows.filter((r) => r.first > 0.05).length, over15cm: rows.filter((r) => r.first > 0.15).length,
   worst: rows.slice().sort((a, b) => b.first - a.first).slice(0, 8).map((r) => `${r.char}:${r.id} ${(r.first * 100).toFixed(0)}cm`),
 };
 
+const byLimb = {};
+for (const r of rows) { (byLimb[r.limb[0] === 'h' && r.limb.length === 2 ? 'hand' : r.limb[0] === 'f' ? 'foot' : r.limb] = byLimb[r.limb[0] === 'h' && r.limb.length === 2 ? 'hand' : r.limb[0] === 'f' ? 'foot' : r.limb] || []).push(r.first * 100); }
+result.reach.byLimb = Object.fromEntries(Object.entries(byLimb).map(([k, v]) => [k, +(v.reduce((s, x) => s + x, 0) / v.length).toFixed(1) + 'cm x' + v.length]));
 const f2 = (x) => x.toFixed(2);
 console.log('\n=== foot slip (m of sliding per second of ground contact; lower is better) ===');
 for (const r of result.footSlip) console.log(r.name.padEnd(10), 'slip', f2(r.slipPerSec).padStart(6), 'm/s   worst single-frame step', f2(r.maxStepCm).padStart(6), 'cm');
@@ -257,6 +289,7 @@ console.log('\n=== life while standing ===');
 console.log('chest RMS motion', f2(result.life.chestRmsCm), 'cm   head turn', f2(result.life.headTurnDegPerSec), 'deg/s');
 console.log('\n=== AI fights (', QUICK ? 4 : 10, 'matches ) ===');
 console.log(JSON.stringify(Object.fromEntries(Object.entries(result.fights).map(([k, v]) => [k, +v.toFixed(3)]))));
+if (SHOW_POPS) { const g = {}; for (const p of popLog) { const d = (p.tr.split(' joint')[0].split(' -> ')[1] || '?').split(':')[0].replace(/[cg]$/, ''); (g[d] = g[d] || []).push(p.post - p.before); } console.log('\nmean excess pop by destination state:'); for (const [k, v] of Object.entries(g).sort((a, b) => b[1].length - a[1].length)) console.log('  ' + k.padEnd(8), 'n=' + String(v.length).padStart(4), 'mean', (v.reduce((a, b) => a + b, 0) / v.length).toFixed(1).padStart(6)); }
 if (SHOW_POPS) { const rows = popLog.map((p) => ({ ...p, ex: p.post - p.before })).sort((a, b) => b.ex - a.ex).slice(0, 25); console.log('\n=== worst pops ===\n' + rows.map((r) => `${r.ex.toFixed(0).padStart(4)}  (${r.before.toFixed(0)} -> ${r.post.toFixed(0)})  ${r.tr}`).join('\n')); }
 console.log('\n=== strike reach: intended strike point vs where the limb really is ===');
 console.log(JSON.stringify(Object.fromEntries(Object.entries(result.reach).map(([k, v]) => [k, typeof v === 'number' ? +v.toFixed(2) : v]))));

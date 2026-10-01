@@ -57,6 +57,19 @@
     "firstFrameMeanCm": 33.906637603751065,
     "firstFrameP90Cm": 68.88396039717807,
     "firstFrameMaxCm": 102.9188515287651,
+    "missFirstMeanCm": 5.563630306459204,
+    "missActiveMeanCm": 5.546675189445488,
+    "missFirstP90Cm": 25.31942937047284,
+    "missOver1cm": 100,
+    "missOver5cm": 82,
+    "missWorst": [
+      "jaeho:air4 62cm",
+      "asura:air4 61cm",
+      "bruno:air4 59cm",
+      "luna:air4 59cm",
+      "ironclad:air4 58cm",
+      "tawan:air4 56cm"
+    ],
     "activeMeanCm": 30.62493519566438,
     "activeMaxCm": 108.24509226750195,
     "over5cm": 335,
@@ -70,6 +83,14 @@
       "tawan:air4 97cm",
       "kenzo:air4 97cm",
       "kage:air4 97cm"
-    ]
+    ],
+    "byLimb": {
+      "hand": "30cm x196",
+      "foot": "36.8cm x167",
+      "eR": "48.3cm x4",
+      "sh": "50cm x14",
+      "kL": "30.2cm x3",
+      "kR": "37.7cm x3"
+    }
   }
 }

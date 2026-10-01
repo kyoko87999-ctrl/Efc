@@ -36,7 +36,8 @@ const HL = {
   [ST.GETUP]: { torso: 3.0, arms: 3.0, legs: 3.0, face: 0 },
   [ST.GRAB]: { torso: 2.0, arms: 2.0, legs: 2.0, face: 0 },
   [ST.WALL]: { torso: 2.0, arms: 2.0, legs: 2.0, face: 0 },
-  [ST.DASHF]: { torso: 3.0, arms: 3.0, legs: 3.0, face: 0 },
+  [ST.DASHF]: { torso: 4.0, arms: 4.0, legs: 4.0, face: 0 },
+  [ST.SS]: { torso: 3.5, arms: 3.5, legs: 3.5, face: 0 },
   [ST.DASHB]: { torso: 2.5, arms: 3.0, legs: 2.5, face: 0 },
   [ST.IDLE]: { torso: 5.0, arms: 4.0, legs: 5.0, face: 0 },
 };

@@ -10,7 +10,7 @@ import { STAGES } from '../src/render/stagesData.js';
 import { Puppet } from '../src/render/puppet.js';
 import { NEUTRAL } from './helpers.mjs';
 
-const MATCHES = +(process.argv[2] || 10), FRAMES = +(process.argv[3] || 1500);
+const MATCHES = +(process.argv[2] || 10), FRAMES = +(process.argv[3] || 1500), SUB = +(process.argv[4] || 1);       // SUB: render frames per sim frame (3 = 180 Hz)
 const COMPILED = new Map(CHARS.map((c) => [c.id, compileChar(c)]));
 const GRID = STAGES.find((s) => s.id === 'grid');
 const V = THREE.Vector3;
@@ -29,7 +29,7 @@ for (let g = 0; g < MATCHES; g++) {
     m.step(brains.map((b) => b.think(m)));
     t++;
     const freeze = m.hitstop > 0;
-    pup.forEach((p) => p.update(freeze ? 0 : 1, t / 60, freeze ? 0 : 1, freeze));
+    for (let s = 1; s <= SUB; s++) pup.forEach((p) => p.update(freeze ? 0 : s / SUB, t / 60, freeze ? 0 : 1 / SUB, freeze));
     pup.forEach((p) => p.rig.root.updateMatrixWorld(true));
     if (freeze) continue;
     frames++;

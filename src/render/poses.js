@@ -111,7 +111,7 @@ export function dashPose(C, P, back) {
   const t = cl01(tf(C, f.stT) / 24);
   stand(C, P);
   if (!back) {
-    const lean = 20 * (1 - easeOut(t) * 0.55);
+    const lean = 20 * (1 - easeOut(t) * 0.55) * smooth(tf(C, f.stT) / 4);
     add3(P.hipsRot, lean * 0.4, 0, 0); add3(P.spine, lean, 0, 0);
     P.hips[1] -= 0.06; P.hips[2] += 0.05;
     P._r.hL = [-0.2, 1.12, 0.24]; P._r.hR = [0.2, 1.12, 0.22];
