@@ -148,7 +148,7 @@ function kickModel(S, p) {
   // support foot pivots with the pelvis, heel slightly up
   pivotFoot(P, S.limb === 'fL' || S.limb === 'kL' ? 'R' : 'L', hy * p.pv, p.heel * e0);
   // striking foot shape: pitch (+ = toes pointed), yaw, roll
-  const k = S.limb === 'fL' ? 0 : 1;
+  const k = S.limb === 'fL' || S.limb === 'kL' ? 0 : 1;
   const kf = k === 0 ? P.footL : P.footR;
   const pose = clamp(e0 + w * 0.5, 0, 1);
   kf[0] += p.fp * pose; kf[1] += sd * p.fy * e0; kf[2] += sd * p.fr * e0;

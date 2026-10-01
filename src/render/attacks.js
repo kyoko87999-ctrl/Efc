@@ -57,6 +57,14 @@ export function attackPose(C, P) {
     else { P._r.fL = [-0.13, 0.35, 0.12]; P._r.fR = [0.13, 0.32, -0.02]; }
     P.kneePole = [0.2, 0, 1]; P.kneePoleS = [0.2, 0, 1];
   }
+  // a whiffed strike carries the body: it lurches forward a little while the recovery plays out
+  if (!f.contact && !m.noHit && m.lv !== 't') {
+    const last = m.st + m.ac - 1;
+    if (mf > last) {
+      const r = cl01((mf - last) / Math.max(1, m.total - last)), w = Math.sin(Math.PI * r) * Math.min(1, 0.4 + m.dmg / 18);
+      P.spine[0] += 5 * w; P.hips[2] += 0.03 * w; P.headAdd[0] += 4 * w; P.hips[1] -= 0.012 * w;
+    }
+  }
   // full-body spin / flip
   if (m.an) {
     if (m.an.spin) { const [a, b, deg] = m.an.spin; P.hipsRot[1] += -sd * deg * easeInOut(cl01((mf - a) / (b - a))); }

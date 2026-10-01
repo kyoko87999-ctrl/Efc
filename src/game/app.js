@@ -33,6 +33,9 @@ export class App {
     if (st.lang) setLang(st.lang);
     this.gv = new GameView(this.canvas, { quality: st.quality });
     this.gv.flashEl = document.getElementById('flash');
+    this.lastStepT = [0, 0];
+    // footfalls from the animator's foot planting (rate limited per fighter)
+    this.gv.onStep = (idx, power) => { const n = performance.now(); if (n - this.lastStepT[idx] < 110 || this.paused) return; this.lastStepT[idx] = n; audio.sfx('step', { vol: power * 0.9 }); };
     this.hud = new Hud(document.getElementById('hud'));
     this.ui = new UI(document.getElementById('ui'));
     this.touch = new TouchControls(document.getElementById('touch'), () => this.pause());

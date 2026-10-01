@@ -65,7 +65,7 @@ export class Animator {
     this.expr = { blink: 0, mouth: 0, brow: 0.22, browUp: 0, squint: 0 };
     this.key = ''; this.impSeq = fighter.impactSeq | 0; this.strikeSeq = fighter.strikeSeq | 0;
     this.prevVel = [0, 0, 0]; this.velReady = false;
-    this.tremble = 0; this.wingS = 0.25;
+    this.tremble = 0; this.wingS = 0.25; this.footfalls = [];
     this.cur = this.P;
     this._sh = [0, 0, 0];
     this.handDir = { hL: [-0.3, 0, 0.9], hR: [0.3, 0, 0.9] };
@@ -184,6 +184,8 @@ export class Animator {
     const sc = root.sc || 1;
     const st = this.stepper.update(P, { x: root.x, z: root.z, yaw: root.yaw, sc, vx: root.vx, vz: root.vz, dtF, mode: g.mode, T: g.T, lift: g.lift ?? undefined, settle: g.settle, teleport: C.teleport });
     P.hips[0] += st.hipsX; P.hips[1] += st.hipsY;
+    this.footfalls.length = 0;
+    if (st.planted && dtF > 0) for (const i of st.planted) this.footfalls.push({ side: i, power: clamp(0.25 + C.speed * 14, 0.25, 1) });
     if (g.amt > 0 && g.mode !== 'free') {
       const R = C.R, sw = (P._r.fL[2] - P._r.fR[2]) - (R.fL[2] - R.fR[2]);
       const a = g.amt;

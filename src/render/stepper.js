@@ -36,7 +36,7 @@ export class FootStepper {
     const speed = Math.hypot(c.vx, c.vz) / sc;
     const moving = speed > 0.012;
     const homes = [P._r.fL, P._r.fR];
-    const out = { hipsX: 0, hipsY: 0, swinging: -1 };
+    const out = { hipsX: 0, hipsY: 0, swinging: -1, planted: null };
 
     if (!this.init || c.teleport) {
       for (let i = 0; i < 2; i++) { const f = this.feet[i]; const w = toW(homes[i][0], homes[i][2]); f.wx = w[0]; f.wz = w[1]; f.mode = 'plant'; f.y = 0; f.pitch = 0; f.toe = 0; }
@@ -110,7 +110,7 @@ export class FootStepper {
       f.y = f.lift * Math.sin(Math.PI * Math.pow(u, 0.8));
       f.pitch = 24 * (1 - smooth(clamp(u / 0.3, 0, 1))) - 14 * smooth(clamp((u - 0.7) / 0.3, 0, 1));
       f.toe = 22 * (1 - smooth(clamp(u / 0.3, 0, 1)));
-      if (u >= 1) { f.mode = 'plant'; f.y = 0; f.pitch = 0; f.toe = 0; f.wx = lx; f.wz = lz; }
+      if (u >= 1) { f.mode = 'plant'; f.y = 0; f.pitch = 0; f.toe = 0; f.wx = lx; f.wz = lz; (out.planted || (out.planted = [])).push(i); }
       else { out.swinging = i; out.hipsX += (i === 0 ? 1 : -1) * 0.013 * Math.sin(Math.PI * u); out.hipsY -= 0.012 * Math.sin(Math.PI * u); }
     }
 

@@ -127,7 +127,7 @@ class Audio {
       case 'break': this.osc('triangle', 660, t, 0.2, 0.5 * v, null, { to: 990 }); this.noiseBurst(t, 0.08, 0.5, 4000, 1.5); break;
       case 'elec': this.noiseBurst(t, 0.12, 0.35 * v, 6000, 1, 'highpass'); this.osc('sawtooth', 400 * r(), t, 0.12, 0.15, null, { to: 1800 }); break;
       case 'beam': this.osc('sawtooth', 300, t, 0.9, 0.3, null, { to: 100 }); this.noiseBurst(t, 0.9, 0.4, 800, 0.4, 'bandpass', null, 3000); break;
-      case 'step': this.noiseBurst(t, 0.05, 0.12 * v, 400, 0.8, 'lowpass'); break;
+      case 'step': this.noiseBurst(t, 0.05, 0.2 * v, 420, 0.8, 'lowpass'); this.osc('sine', 120 * r(), t, 0.05, 0.12 * v, null, { to: 70 }); break;
       case 'land': this.noiseBurst(t, 0.12, 0.35 * v, 300, 0.6, 'lowpass'); this.osc('sine', 100, t, 0.14, 0.4 * v, null, { to: 50 }); break;
       case 'dash': this.noiseBurst(t, 0.14, 0.14 * v, 700, 0.7, 'bandpass', null, 1800); break;
       case 'roll': this.noiseBurst(t, 0.2, 0.14 * v, 500, 0.5, 'lowpass'); break;

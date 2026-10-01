@@ -63,6 +63,7 @@ export class FighterView {
   update(alpha, T, dtF, freeze) {
     const f = this.f, rig = this.rig;
     this.puppet.update(alpha, T, dtF, freeze);
+    if (this.anim.footfalls.length && this.gv.onStep) for (const ff of this.anim.footfalls) this.gv.onStep(f.idx, ff.power);
     const { x, z } = this.puppet.pos;
     // colour effects
     let tintC = null, tintA = 0;

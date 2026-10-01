@@ -49,7 +49,7 @@ for (let g = 0; g < MATCHES; g++) {
         for (const k of ['fL', 'fR']) {
           const j2 = p.rig.limbs[k].j2;
           const fp = p.rig.footPoints(k === 'fL' ? 0 : 1).map((a) => j2.localToWorld(new V(a[0], a[1], a[2])));
-          for (let qi = 0; qi < fp.length; qi++) { const q = fp[qi]; if (q.y < minFoot) minFoot = q.y; if (q.y < -0.03) { const P = p.anim.P; note('sink', st, key + ` y=${q.y.toFixed(3)} foot=${k} pt=${qi} pitch=${(k === 'fL' ? P.footL : P.footR).map((x) => x.toFixed(0))} toe=${P.toe.map((x) => x.toFixed(0))} r=${P._r[k].map((x) => x.toFixed(2))} fy=${f.y.toFixed(2)}`); break; } }
+          for (let qi = 0; qi < fp.length; qi++) { const q = fp[qi]; if (q.y < minFoot) minFoot = q.y; if (q.y < -0.03) { const P = p.anim.P; note('sink', st, key + ` y=${q.y.toFixed(3)} foot=${k} pt=${qi} pitch=${(k === 'fL' ? P.footL : P.footR).map((x) => x.toFixed(0))} toe=${P.toe.map((x) => x.toFixed(0))} r=${P._r[k].map((x) => x.toFixed(2))} fy=${f.y.toFixed(2)} ch=${f.ch.id} mf=${f.mf} sf=${p.anim.stepper.feet[k === 'fL' ? 0 : 1].mode}/${p.anim.stepper.feet[k === 'fL' ? 0 : 1].pitch.toFixed(0)} ank=${P.ankle.map((x) => x.toFixed(0))}`); break; } }
         }
       }
     }
