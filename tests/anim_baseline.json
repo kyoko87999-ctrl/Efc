@@ -1,0 +1,75 @@
+{
+  "footSlip": [
+    {
+      "name": "idle",
+      "slipPerSec": 0.002577677430074001,
+      "maxStepCm": 0.014773753680061614,
+      "frames": 180
+    },
+    {
+      "name": "walk fwd",
+      "slipPerSec": 1.3294005391174188,
+      "maxStepCm": 7.626040915326149,
+      "frames": 180
+    },
+    {
+      "name": "walk back",
+      "slipPerSec": 1.2495904159852742,
+      "maxStepCm": 7.989311589387782,
+      "frames": 180
+    },
+    {
+      "name": "sidewalk",
+      "slipPerSec": 2.877260125775247,
+      "maxStepCm": 15.637395498405251,
+      "frames": 190
+    },
+    {
+      "name": "run",
+      "slipPerSec": 2.3786257957167494,
+      "maxStepCm": 41.38676589376617,
+      "frames": 184
+    },
+    {
+      "name": "crouch",
+      "slipPerSec": 0.040457431357364966,
+      "maxStepCm": 2.754323957861419,
+      "frames": 90
+    }
+  ],
+  "life": {
+    "chestRmsCm": 0.8783348418704361,
+    "headTurnDegPerSec": 0
+  },
+  "fights": {
+    "transitions": 1551,
+    "popPostMean": 47.74265219546219,
+    "popPostP90": 94.1241591153023,
+    "popExcessMean": 36.078512640274354,
+    "popExcessP90": 79.68550368733288,
+    "steadyMean": 11.951700670431082,
+    "jerkP99": 126.63299857937835,
+    "jerkMean": 12.85538814392477,
+    "headAimDeg": 15.527953676418443
+  },
+  "reach": {
+    "moves": 387,
+    "firstFrameMeanCm": 33.906637603751065,
+    "firstFrameP90Cm": 68.88396039717807,
+    "firstFrameMaxCm": 102.9188515287651,
+    "activeMeanCm": 30.62493519566438,
+    "activeMaxCm": 108.24509226750195,
+    "over5cm": 335,
+    "over15cm": 277,
+    "worst": [
+      "jaeho:air4 103cm",
+      "asura:air4 102cm",
+      "luna:air4 100cm",
+      "bruno:air4 100cm",
+      "ironclad:air4 99cm",
+      "tawan:air4 97cm",
+      "kenzo:air4 97cm",
+      "kage:air4 97cm"
+    ]
+  }
+}

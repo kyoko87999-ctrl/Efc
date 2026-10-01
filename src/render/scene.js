@@ -1,7 +1,6 @@
 // GameView: owns the WebGL renderer, stage, fighter views, camera and effects.
 import * as THREE from 'three';
-import { Rig, mergeBody } from './rig.js';
-import { Animator } from './anim.js';
+import { Puppet } from './puppet.js';
 import { CameraRig } from './camera.js';
 import { Fx, Trail } from './fx.js';
 import { buildStage, stageById } from './stages.js';
@@ -45,9 +44,9 @@ class CapVis {
 export class FighterView {
   constructor(gv, f, ch, cust) {
     this.gv = gv; this.f = f; this.ch = ch;
-    const alt = ch.alts && cust?.alt != null ? ch.alts[cust.alt - 1] : null;
-    this.rig = new Rig(mergeBody(ch.body, alt, cust?.custom));
-    this.anim = new Animator(this.rig, f, ch);
+    this.puppet = new Puppet(f, ch, cust);
+    this.rig = this.puppet.rig;
+    this.anim = this.puppet.anim;
     gv.scene.add(this.rig.root);
     this.trails = {};
     this.tmp = new V3(); this.tmp2 = new V3();
@@ -63,14 +62,8 @@ export class FighterView {
 
   update(alpha, T, dtF, freeze) {
     const f = this.f, rig = this.rig;
-    const P = this.anim.update(alpha, T, freeze);
-    this.anim.blend > 0 && (this.anim.blend = Math.max(0, this.anim.blend - dtF));
-    const x = lerp(f.px, f.x, alpha), y = lerp(f.py, f.y, alpha), z = lerp(f.pz, f.z, alpha);
-    const a0 = Math.atan2(f.pfx, f.pfz), a1 = Math.atan2(f.fx, f.fz);
-    const yaw = a0 + angleDiff(a0, a1) * alpha;
-    rig.root.position.set(x, y + P.rootY, z);
-    rig.root.rotation.y = yaw + P.rootYaw * DEG;
-    rig.root.scale.setScalar(f.sc);
+    this.puppet.update(alpha, T, dtF, freeze);
+    const { x, z } = this.puppet.pos;
     // hair / scarf sway
     if (rig.hairTail) rig.hairTail.rotation.x = 0.15 + Math.sin(T * 3) * 0.06 + (f.walkDir ? 0.15 : 0);
     if (rig.scarfTail) rig.scarfTail.rotation.x = -0.15 + Math.sin(T * 4) * 0.12;
