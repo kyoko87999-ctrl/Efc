@@ -42,7 +42,7 @@ export function lookAt(an, C, P) {
   const L = an.look;
   if (!L.ready || C.teleport) { L.s = t[0]; L.u = t[1]; L.f = t[2]; L.ready = true; }
   else { const k = 1 - Math.exp(-Math.max(C.dtF, 0) / 3.5); L.s += (t[0] - L.s) * k; L.u += (t[1] - L.u) * k; L.f += (t[2] - L.f) * k; }
-  P.lookT = [L.s, L.u, L.f];
+  P.lookT = [L.s + (L.off || 0), L.u + (L.off ? 0.1 : 0), L.f];
   let w = LOOK_W[f.state] ?? 1;
   if (f.state === ST.ATK && f.move && f.move.an && f.move.an.wake) w = 0.3;
   P.lookW = w;
@@ -93,6 +93,9 @@ export function expression(an, C, P) {
     case ST.INTRO: brow = 0.7; break;
     default: break;
   }
+  // hints from the pose (shouts, taunts ...)
+  const fh = C.face;
+  if (fh) { mouth = Math.max(mouth, fh.mouth); if (fh.brow !== null) brow = fh.brow; squint = Math.max(squint, fh.squint); browUp = Math.max(browUp, fh.browUp); }
   an.expr.blink += (blink - an.expr.blink) * Math.min(1, C.dtF * 0.9 + 0.05);
   an.expr.mouth += (mouth - an.expr.mouth) * Math.min(1, C.dtF * 0.5 + 0.02);
   an.expr.brow += (brow - an.expr.brow) * Math.min(1, C.dtF * 0.4 + 0.02);
@@ -120,4 +123,29 @@ export class LimbLag {
     }
   }
   apply(P, keys) { for (const k of keys) { const r = P._r[k]; if (r) { r[0] += this.o[k][0]; r[1] += this.o[k][1]; r[2] += this.o[k][2]; } } }
+}
+
+// ------------------------------------------------------------------ idle fidgets
+// every few seconds a standing fighter does something small (roll a shoulder, stretch the neck, flex a hand, shift weight, glance away)
+export function fidget(an, C, P) {
+  const f = C.f, F = an.fid;
+  const calm = f.state === ST.IDLE && !f.walkDir && !f.sideWalk && !f.crouch && !f.guard && !f.stance;
+  if (!calm) { F.kind = -1; F.next = Math.max(F.next, 150); F.off = 0; an.look.off = 0; return; }
+  if (F.kind < 0) {
+    F.next -= C.dtF;
+    if (F.next > 0) return;
+    F.kind = Math.floor(an.rng() * 6); F.t = 0; F.len = 34 + an.rng() * 26; F.sg = an.rng() < 0.5 ? -1 : 1;
+  }
+  F.t += C.dtF;
+  const u = F.t / F.len;
+  if (u >= 1) { F.kind = -1; F.next = 240 + an.rng() * 380; an.look.off = 0; return; }
+  const b = Math.pow(Math.sin(Math.PI * u), 1.4), s = F.sg;
+  switch (F.kind) {
+    case 0: { const w = Math.sin(TAU * u); P.shL[1] += 0.05 * b; P.shR[1] += 0.05 * b; P.shL[0] += 0.03 * w * b; P.shR[0] -= 0.03 * w * b; P.spine[1] += 3 * w * b; break; }
+    case 1: P.headAdd[2] += 11 * s * b; P.headAdd[1] += 6 * s * b; P.neck[2] += 3 * s * b; break;
+    case 2: { const k = 0.3 + 0.7 * Math.abs(Math.sin(TAU * u * 1.5)); P.fist[0] = 0.62 - 0.55 * b * k; P.fist[1] = 0.62 - 0.4 * b * (1 - k); P.wristL[2] += 12 * b; break; }
+    case 3: P.hips[0] += 0.03 * s * b; P.hipsRot[2] += 3 * s * b; P.spine[2] -= 2 * s * b; break;
+    case 4: an.look.off = 1.1 * s * b; break;
+    default: P.headAdd[0] += -7 * b; P.chest[0] -= 2 * b; break;
+  }
 }

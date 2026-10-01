@@ -43,13 +43,15 @@ await page.evaluate(([spec]) => {
   document.getElementById('toast').style.display = 'none';
   const gv = __app.gv;
   window.__lab = { spec, shots: 0 };
-  gv.rig.update = function (dtF, match) {
+  const origUpdate = gv.rig.update;
+  gv.rig.update = spec.view === 'game' ? origUpdate : function (dtF, match) {
     const a = match.fighters[0], b = match.fighters[1];
     const cam = gv.camera;
     const v = spec.view || 'side';
     let cx, cz, px, py, pz, ly, fov;
     if (v === 'two') { cx = (a.x + b.x) / 2; cz = (a.z + b.z) / 2; const d = spec.d || 5.5; px = cx; py = 1.3; pz = cz + d; ly = 0.95; fov = spec.fov || 34; }
     else if (v === 'close') { cx = a.x + 0.2; cz = a.z; const d = spec.d || 2.6; px = cx + 0.4; py = 1.5; pz = cz + d; ly = 1.4; fov = spec.fov || 28; }
+    else if (v === 'q') { const d = spec.d || 3.6, az = (spec.az ?? 35) * Math.PI / 180; cx = a.x; cz = a.z; px = a.x + Math.sin(az) * d; pz = a.z + Math.cos(az) * d; py = spec.cy ?? 1.25; ly = spec.ly ?? 0.95; fov = spec.fov || 32; }
     else if (v === 'face') { const d = spec.d || 1.1; const hy = spec.hy || 1.52; px = a.x + d; py = hy; pz = a.z + (spec.side ?? 0.25); cx = a.x; cz = a.z; ly = hy - 0.02; fov = spec.fov || 26; }
     else { cx = a.x + 0.25; cz = a.z; const d = spec.d || 3.6; px = cx; py = 1.0; pz = cz + d; ly = 0.92; fov = spec.fov || 30; }
     cam.position.set(px, py, pz);

@@ -13,7 +13,7 @@ import { newPose, resetPose, copyPose, canon, finalize, ankleLift, syncPoles } f
 import { Inertializer, NCH, flatten, unflatten, channelsOf } from './inertia.js';
 import { FootStepper } from './stepper.js';
 import { Reactor } from './react.js';
-import { LimbLag, breathe, lookAt, expression } from './layers.js';
+import { LimbLag, breathe, lookAt, expression, fidget } from './layers.js';
 import { solveReach } from './reach.js';
 import { carryHands } from './carry.js';
 import { statePose } from './poses.js';
@@ -40,6 +40,7 @@ const HL = {
   [ST.DASHB]: { torso: 2.5, arms: 3.0, legs: 2.5, face: 0 },
   [ST.IDLE]: { torso: 5.0, arms: 4.0, legs: 5.0, face: 0 },
 };
+const WINGS = { [ST.IDLE]: 0.25, [ST.ATK]: 0.75, [ST.AIR]: 0.95, [ST.JUMP]: 0.9, [ST.HIT]: 0.7, [ST.BLK]: 0.5, [ST.DASHF]: 0.85, [ST.DASHB]: 0.7, [ST.RUN]: 0.85, [ST.DOWN]: 0.0, [ST.KO]: 0.0, [ST.WIN]: 0.9, [ST.LOSE]: 0.0, [ST.INTRO]: 0.5, [ST.GETUP]: 0.4 };
 const HL_DEFAULT = { torso: 4, arms: 3.5, legs: 4, face: 0 };
 
 export class Animator {
@@ -51,7 +52,9 @@ export class Animator {
     this.stepper = new FootStepper();
     this.react = new Reactor(Math.max(0.6, (fighter.sc || 1) ** 2));
     this.lag = new LimbLag();
-    this.look = { ready: false, s: 0, u: 0, f: 0 };
+    this.look = { ready: false, s: 0, u: 0, f: 0, off: 0 };
+    this.fid = { kind: -1, t: 0, len: 40, next: 120 + (fighter.idx || 0) * 70, sg: 1, off: 0 };
+    this.prevState = fighter.state;
     let seed = (fighter.idx || 0) * 7919 + 17;
     for (const c of String(ch.id || 'x')) seed = (seed * 31 + c.charCodeAt(0)) >>> 0;
     this._rng = new Rng(seed);
@@ -61,7 +64,7 @@ export class Animator {
     this.expr = { blink: 0, mouth: 0, brow: 0.22, browUp: 0, squint: 0 };
     this.key = ''; this.impSeq = fighter.impactSeq | 0; this.strikeSeq = fighter.strikeSeq | 0;
     this.prevVel = [0, 0, 0]; this.velReady = false;
-    this.tremble = 0;
+    this.tremble = 0; this.wingS = 0.25;
     this.cur = this.P;
     this._sh = [0, 0, 0];
     this.handDir = { hL: [-0.3, 0, 0.9], hR: [0.3, 0, 0.9] };
@@ -70,7 +73,8 @@ export class Animator {
     const A = this;
     this.C = {
       f: fighter, ch, R: ch.rest, T: 0, dtF: 1, alpha: 1, sub: 0, freeze: false, root: ROOT0, speed: 0, teleport: false,
-      pin: { hL: false, hR: false }, marked: false,
+      pin: { hL: false, hR: false }, marked: false, hasWings: !!rig.wingGroups, wings: 0,
+      face: { mouth: 0, brow: null, squint: 0, browUp: 0 },
       gait: { mode: 'lock', T: 8, lift: null, settle: 0.2, amt: 0 },
       mark(P) { copyPose(A.M, P); this.marked = true; },
       tmp(i) { return A._tmp[i]; },
@@ -97,6 +101,17 @@ export class Animator {
     return k + (f.stance ? ':' + f.stance : '') + (f.crouch ? 'c' : '') + (f.guard ? 'g' : '');
   }
 
+  // squash & stretch on take-off / landing / ground impacts
+  onState(from, to) {
+    const f = this.f;
+    if (to === ST.JUMP) this.react.kickSquash(0.018);
+    else if (to === ST.LAND) this.react.kickSquash(-0.035);
+    else if ((to === ST.DOWN || to === ST.KO) && from === ST.AIR) this.react.kickSquash(-0.05);
+    else if (to === ST.WALL) this.react.kickSquash(-0.06);
+    else if (from === ST.GRAB && to === ST.AIR) this.react.kickSquash(0.02);
+    void f;
+  }
+
   // a hit / block landed on this fighter: kick the reaction springs
   onImpact(imp) {
     const f = this.f;
@@ -116,10 +131,15 @@ export class Animator {
 
     const imp = f.impact;
     if (imp && imp.seq !== this.impSeq) { this.impSeq = imp.seq; this.onImpact(imp); }
+    const stk = f.strike;
+    if (stk && stk.seq !== this.strikeSeq) { this.strikeSeq = stk.seq; this.react.recoil(stk.hit, f.move && f.move.dmg >= 15, 1); }
+
+    if (f.state !== this.prevState) { this.onState(this.prevState, f.state); this.prevState = f.state; }
 
     // ---- 1. authored state pose
     resetPose(P);
     C.pin.hL = C.pin.hR = false; C.marked = false;
+    C.face.mouth = 0; C.face.brow = null; C.face.squint = 0; C.face.browUp = 0; C.wings = -1;
     const g = C.gait; g.mode = 'lock'; g.T = 8; g.lift = null; g.settle = 0.2; g.amt = 0;
     if (f.state === ST.ATK && f.move) attackPose(C, P); else { statePose(C, P); syncPoles(P); }
     canon(P);
@@ -145,11 +165,19 @@ export class Animator {
     const calm = f.state === ST.ATK ? 0.25 : f.state === ST.HIT || f.state === ST.BLK ? 0.3 : f.state === ST.DOWN || f.state === ST.KO ? 1.2 : 1;
     breathe(this, C, P, this.breathAmt * calm);
     lookAt(this, C, P);
+    fidget(this, C, P);
     expression(this, C, P);
 
     // ---- 4. reaction springs
     this.react.step(dtF);
-    this.react.apply(P, 1);
+    this.react.apply(P, 1, f.state === ST.ATK && P.reach && this.rCache[P.reach.key] ? { [P.reach.key]: true } : null);
+
+    // wings (Asura): spread with the action, flare on impacts
+    if (this.rig.wingGroups) {
+      const target = C.wings >= 0 ? C.wings : WINGS[f.state] ?? 0.3;
+      this.wingS += (target + Math.min(0.5, this.react.energy * 0.3) - this.wingS) * (1 - Math.exp(-Math.max(dtF, 0) / 7));
+      this.rig.setWings(clamp(this.wingS, 0, 1), 0.4 * Math.sin(T * 2.4) * (0.4 + this.wingS));
+    }
 
     // ---- 5. feet
     const sc = root.sc || 1;
@@ -159,8 +187,9 @@ export class Animator {
       const R = C.R, sw = (P._r.fL[2] - P._r.fR[2]) - (R.fL[2] - R.fR[2]);
       const a = g.amt;
       P.hipsRot[1] -= clamp(sw, -0.5, 0.5) * 14 * a; P.spine[1] += clamp(sw, -0.5, 0.5) * 9 * a;
-      if (!C.pin.hL) { P._r.hL[2] -= sw * 0.4 * a; P._r.hL[1] -= Math.max(0, sw) * 0.05 * a; }
-      if (!C.pin.hR) { P._r.hR[2] += sw * 0.4 * a; P._r.hR[1] -= Math.max(0, -sw) * 0.05 * a; }
+      const sc2 = clamp(sw, -0.45, 0.45);
+      if (!C.pin.hL) { P._r.hL[2] -= sc2 * 0.26 * a; P._r.hL[1] -= Math.max(0, sc2) * 0.05 * a; }
+      if (!C.pin.hR) { P._r.hR[2] += sc2 * 0.26 * a; P._r.hR[1] -= Math.max(0, -sc2) * 0.05 * a; }
     }
 
     // ---- 6. limb lag

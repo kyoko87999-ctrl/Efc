@@ -32,7 +32,7 @@ export function stand(C, P) {
     P.hips[1] += Math.abs(b) * I.bounce;
     P.footL[0] += 14 * Math.max(0, b); P.footR[0] += 14 * Math.max(0, -b);
     P._r.fL[1] += Math.max(0, b) * I.bounce * 0.8; P._r.fR[1] += Math.max(0, -b) * I.bounce * 0.8;
-    P.toe[0] += 8 * Math.max(0, b); P.toe[1] += 8 * Math.max(0, -b);
+    P.toe[0] += 14 * Math.max(0, b); P.toe[1] += 14 * Math.max(0, -b);
   }
   if (I.sway) {
     const s = Math.sin(T * (I.swaySpeed ?? 2.2));
@@ -268,25 +268,30 @@ export function airPose(C, P) {
   } else if (k === 'kd') {
     pitch = lerp(0, -70, easeOut(cl01(t / 14))); hy = lerp(0.9, 0.55, cl01(t / 14));
   } else {
-    pitch = lerp(0, -78, easeOut(fall)); hy = lerp(0.9, 0.5, fall);
+    pitch = lerp(0, -78, easeOut(fall)) + 6 * Math.sin(t * 0.22); hy = lerp(0.9, 0.5, fall);
     if (k === 'tornado' || k === 'screw') { yaw = t * 26; roll = Math.sin(t * 0.3) * 6; }
     else roll = Math.sin(t * 0.5) * 5;
   }
   if (k === 'ko') { pitch = lerp(0, -84, easeOut(cl01(t / 14))); roll = 0; }
   set3(P.hips, 0, hy, 0);
   set3(P.hipsRot, pitch, yaw, roll);
-  set3(P.spine, 0, 0, 0);
-  set3(P.head, up ? -14 * fall : 14 * fall, 0, 0);
+  const sg = up ? 1 : -1;
+  set3(P.spine, -16 * fall * sg, 0, 0);
+  set3(P.head, up ? -16 * fall : 16 * fall, 0, 0);
   for (const kk of ['hL', 'hR', 'fL', 'fR']) P._r[kk] = null;
-  const flail = Math.sin(t * 0.8) * 0.05;
+  const w1 = Math.sin(t * 0.43), w2 = Math.sin(t * 0.37 + 1.7), w3 = Math.sin(t * 0.31 + 0.6);
+  const damp = 0.5 + 0.5 * Math.exp(-t / 40);
   if (pitch < 0) {
-    set3(P.hL, -0.55, 0.25 + flail, -0.25); set3(P.hR, 0.55, 0.25 - flail, -0.25);
-    set3(P.fL, -0.18, -0.72, 0.15); set3(P.fR, 0.18, -0.78, 0.05);
+    // on the back: arms thrown up and out, knees bent, legs trailing
+    const throwK = fall * damp;
+    set3(P.hL, -0.5 - 0.1 * w1, 0.3 + 0.28 * throwK + 0.07 * w2, 0.12 + 0.1 * w3); set3(P.hR, 0.5 + 0.1 * w2, 0.3 + 0.28 * throwK + 0.07 * w1, 0.12 - 0.1 * w1);
+    set3(P.fL, -0.17, -0.66 - 0.04 * w1, 0.22 + 0.1 * w2); set3(P.fR, 0.18, -0.72 + 0.04 * w3, 0.04 + 0.1 * w1);
   } else {
     set3(P.hL, -0.5, 0.15, 0.25); set3(P.hR, 0.5, 0.15, 0.25);
     set3(P.fL, -0.18, -0.8, -0.1); set3(P.fR, 0.18, -0.72, -0.12);
   }
-  P.kneePole = [0.2, 0, 1]; P.elbowPole = [0.5, -0.4, -0.6]; P.fist = [0.2, 0.2];
+  P.kneePole = [0.2, 0, 1]; P.elbowPole = [0.5, -0.4, -0.6]; P.fist = [0.25 + 0.2 * w1, 0.25 - 0.2 * w2];
+  P.wristL[0] = 20 * w1; P.wristR[0] = 20 * w2; P.footL[0] = 30 * w3; P.footR[0] = 20 * w1;
   C.gait.mode = 'free';
   return P;
 }
@@ -399,50 +404,132 @@ export function grabbedPose(C, P) {
 }
 
 // ------------------------------------------------------------------------------------------------ showmanship
+// piecewise smooth track through [time, value] keys (held before the first / after the last key)
+export function trk(t, keys) {
+  if (t <= keys[0][0]) return keys[0][1];
+  for (let i = 1; i < keys.length; i++) {
+    if (t <= keys[i][0]) {
+      const a = keys[i - 1], b = keys[i], u = cl01((t - a[0]) / Math.max(1e-6, b[0] - a[0]));
+      return a[1] + (b[1] - a[1]) * (u * 0.35 + smooth(u) * 0.65);
+    }
+  }
+  return keys[keys.length - 1][1];
+}
+const pulse = (t, a, b) => Math.sin(Math.PI * cl01((t - a) / (b - a)));
+const mix = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+
+// the second fighter of a round-1 intro waits for the camera
+function showT(C) {
+  const f = C.f;
+  const wait = f.state === ST.INTRO && f.introFirst && f.idx === 1 ? 50 : 0;
+  return tf(C, f.stT) - wait;
+}
+
 export function introPose(C, P) {
   const f = C.f;
-  const t = tf(C, f.stT);
+  const t = showT(C);
   const style = C.ch.intro || 'fists';
   stand(C, P);
+  const R = C.R;
+  const full = f.introFirst;                 // rounds after the first only get a short "ready" gesture
+  if (t < 0) return P;
+  if (!full) {
+    const k = pulse(t, 0, 60);
+    P._r.hL = mix(P._r.hL, [-0.18, 1.42, 0.40], k); P._r.hR = mix(P._r.hR, [0.14, 1.38, 0.34], k);
+    add3(P.spine, 3 * k, 0, 0); add3(P.head, -4 * k, 0, 0); P.fist = [0.85, 0.85];
+    C.face.brow = 0.6;
+    C.mark(P);
+    return P;
+  }
   if (style === 'bow') {
-    const b = Math.sin(Math.PI * cl01((t - 20) / 60));
-    add3(P.spine, 32 * b, 0, 0); add3(P.hipsRot, 8 * b, 0, 0);
-    P._r.hL = [-0.2, 0.8, 0.1]; P._r.hR = [0.2, 0.8, 0.1];
+    // wai khru: palms together, deep bow, rise
+    const pray = trk(t, [[0, 0], [9, 1], [44, 1], [52, 0]]);
+    const bow = trk(t, [[9, 0], [24, 1], [34, 1], [46, 0]]);
+    P._r.hL = mix(P._r.hL, [-0.05, 1.16, 0.30], pray); P._r.hR = mix(P._r.hR, [0.05, 1.16, 0.30], pray);
+    add3(P.spine, 32 * bow, 0, 0); add3(P.hipsRot, 6 * bow, 0, 0); add3(P.head, 14 * bow, 0, 0); P.hips[2] -= 0.04 * bow; P.hips[1] -= 0.03 * bow;
+    P.fist = [mix([0.6, 0, 0], [0.1, 0, 0], pray)[0], mix([0.6, 0, 0], [0.1, 0, 0], pray)[0]];
+    P.elbowPole = mix(P.elbowPole, [0.2, -1, -0.2], pray);
+    C.face.brow = 0.1 + 0.4 * (1 - pray);
   } else if (style === 'roar') {
-    const b = Math.sin(t * 0.25);
-    P._r.hL = [-0.5, 1.7 + 0.05 * b, 0.1]; P._r.hR = [0.5, 1.7 - 0.05 * b, 0.1];
-    add3(P.spine, -14, 0, 0); add3(P.head, -20, 0, 0);
+    const load = trk(t, [[0, 0], [10, 1], [18, 0]]);
+    const burst = trk(t, [[10, 0], [19, 1], [44, 1], [54, 0]]);
+    const pound = pulse(t, 24, 31) + pulse(t, 31, 38) * 1;
+    P.hips[1] -= 0.14 * load; add3(P.spine, 16 * load - 24 * burst, 0, 0); add3(P.head, -30 * burst + 8 * load, 0, 0);
+    P._r.hL = mix(P._r.hL, [-0.78, 1.42, 0.02], burst); P._r.hR = mix(P._r.hR, [0.78, 1.42, 0.02], burst);
+    // chest beating
+    const pl = pulse(t, 24, 31), pr = pulse(t, 31, 38);
+    P._r.hL = mix(P._r.hL, [-0.12, 1.28, 0.24], pl); P._r.hR = mix(P._r.hR, [0.12, 1.28, 0.24], pr);
+    add3(P.spine, 3 * (pl + pr), 0, 0);
+    P.shL[1] += 0.04 * burst; P.shR[1] += 0.04 * burst; P.fist = [0.95, 0.95];
+    P.hips[1] += 0.0; void pound;
+    C.face.mouth = burst * 0.95; C.face.brow = 0.9; C.face.squint = 0.4 * burst;
+    if (rig_wings(C)) C.wings = 0.4 + 0.6 * burst;
   } else if (style === 'taunt') {
-    P._r.hL = [-0.2, 1.3, 0.5]; P._r.hR = [0.3, 1.0 + 0.2 * Math.sin(t * 0.3), 0.6];
-    add3(P.spine, -4, 12, 0);
+    const w = trk(t, [[0, 0], [8, 1], [40, 1], [52, 0]]);
+    P._r.hL = mix(P._r.hL, [-0.1, 1.18, 0.62], w); P._r.hR = mix(P._r.hR, [0.26, 0.98, 0.06], w);
+    P.fist = [0.15 + 0.3 * Math.max(0, Math.sin(t * 0.8)) * w + (1 - w) * 0.45, 0.4];
+    add3(P.headAdd, 0, 6 * w, 9 * w); add3(P.spine, -4 * w, 10 * w, -4 * w); P.hips[0] += 0.03 * w; P.hips[2] -= 0.03 * w;
+    P.shL[0] += 0.04 * w; P.shR[1] += 0.03 * w;
+    C.face.brow = 0.5 - 0.5 * w; C.face.mouth = 0.2 * w;
   } else {
-    const s = Math.sin(t * 0.35);
-    P._r.hL = [-0.2, 1.3, 0.35 + 0.28 * Math.max(0, s)]; P._r.hR = [0.16, 1.28, 0.25 + 0.28 * Math.max(0, -s)];
-    add3(P.spine, 0, s * 8, 0);
+    // shadow boxing: jab, cross, jab, settle
+    const a = pulse(t, 8, 16), b = pulse(t, 18, 27), c = pulse(t, 29, 36), set = trk(t, [[36, 0], [46, 1]]);
+    P._r.hL = mix(P._r.hL, [-0.16, 1.32, 0.72], Math.max(a, c)); P._r.hR = mix(P._r.hR, [0.12, 1.3, 0.78], b);
+    add3(P.hipsRot, 0, 4 * a - 12 * b + 4 * c, 0); add3(P.spine, 3 * (a + b + c), -8 * a + 22 * b - 8 * c, 0);
+    P.hips[2] += 0.04 * (a + b + c); P.hips[1] += Math.abs(Math.sin(t * 0.55)) * 0.014 * (1 - set);
+    P.fist = [0.9, 0.9]; add3(P.headAdd, 3 * Math.sin(t * 0.55) * (1 - set), 0, 0);
+    // roll the neck as it ends
+    add3(P.headAdd, 0, 0, 5 * pulse(t, 40, 56));
+    C.face.brow = 0.8;
   }
   C.mark(P);
   return P;
 }
+const rig_wings = (C) => !!C.hasWings;
 
 export function winPose(C, P) {
   const f = C.f;
   const t = tf(C, f.stT);
   const style = C.ch.win || 'fist';
   stand(C, P);
+  const hold = trk(t, [[110, 1], [150, 0.4]]);
   if (style === 'bow') {
-    const b = Math.sin(Math.PI * cl01((t - 20) / 70));
-    add3(P.spine, 34 * b, 0, 0); P._r.hL = [-0.2, 0.8, 0.1]; P._r.hR = [0.2, 0.8, 0.1];
+    const bow = trk(t, [[22, 0], [46, 1], [84, 1], [108, 0]]);
+    const salute = trk(t, [[8, 0], [22, 1], [108, 1], [124, 0]]);
+    P._r.hL = mix(P._r.hL, [-0.04, 1.14, 0.30], salute); P._r.hR = mix(P._r.hR, [0.12, 1.18, 0.30], salute);
+    add3(P.spine, 34 * bow, 0, 0); add3(P.hipsRot, 6 * bow, 0, 0); add3(P.head, 12 * bow, 0, 0); P.hips[2] -= 0.04 * bow;
+    P.fist = [0.2 * salute + 0.6 * (1 - salute), 0.9];
+    C.face.brow = 0.0;
   } else if (style === 'flip') {
-    const fl = cl01((t - 6) / 34);
+    const fl = cl01((t - 6) / 32);
+    const air = fl > 0 && fl < 1;
+    C.gait.mode = air ? 'free' : 'lock';
     add3(P.hipsRot, -360 * easeInOut(fl), 0, 0);
-    P._r.hL = [-0.3, 1.5, 0.2]; P._r.hR = [0.3, 1.5, 0.2];
-    P.rootY = Math.sin(Math.PI * fl) * 0.9;
-    C.gait.mode = fl > 0 && fl < 1 ? 'free' : 'lock';
+    P.rootY = Math.sin(Math.PI * fl) * 0.95;
+    const tuck = Math.sin(Math.PI * cl01((fl - 0.15) / 0.7));
+    P._r.fL = mix(P._r.fL, [-0.13, 0.5, 0.2], air ? tuck : 0); P._r.fR = mix(P._r.fR, [0.13, 0.5, 0.0], air ? tuck : 0);
+    P._r.hL = mix(P._r.hL, [-0.25, 1.1, 0.3], air ? tuck : 0); P._r.hR = mix(P._r.hR, [0.25, 1.1, 0.3], air ? tuck : 0);
+    // landing pose: crouched, one fist skyward
+    const land = trk(t, [[38, 0], [46, 1], [100, 1], [130, 0.3]]);
+    P.hips[1] -= 0.22 * land * (1 - cl01((t - 60) / 40) * 0.6); add3(P.spine, 14 * land, -6 * land, 0);
+    P._r.hR = mix(P._r.hR, [0.3, 1.95, 0.1], land); P._r.hL = mix(P._r.hL, [-0.22, 0.9, 0.12], land);
+    P.fist = [0.9, 0.95];
+    C.face.mouth = 0.6 * land; C.face.brow = 0.3;
   } else if (style === 'roar') {
-    P._r.hL = [-0.55, 1.8, 0.1]; P._r.hR = [0.55, 1.8, 0.1]; add3(P.spine, -18, 0, 0); add3(P.head, -22, 0, 0);
+    const b = trk(t, [[6, 0], [16, 1], [110, 1], [130, 0.5]]);
+    const pl = pulse(t, 22, 29) + pulse(t, 36, 43), pr = pulse(t, 29, 36) + pulse(t, 43, 50);
+    P._r.hL = mix(P._r.hL, [-0.82, 1.5, 0.0], b); P._r.hR = mix(P._r.hR, [0.82, 1.5, 0.0], b);
+    P._r.hL = mix(P._r.hL, [-0.12, 1.28, 0.24], cl01(pl)); P._r.hR = mix(P._r.hR, [0.12, 1.28, 0.24], cl01(pr));
+    add3(P.spine, -22 * b, 0, 0); add3(P.head, -26 * b, 0, 0); P.hips[1] -= 0.02 * b; P.shL[1] += 0.05 * b; P.shR[1] += 0.05 * b;
+    P.fist = [0.95, 0.95]; C.face.mouth = 0.9 * b * (1 - 0.5 * hold * 0 ); C.face.brow = 0.9;
   } else {
-    const s = Math.sin(t * 0.2);
-    P._r.hR = [0.3, 1.95 + 0.04 * s, 0.1]; P._r.hL = [-0.2, 1.0, 0.3]; add3(P.spine, -6, 10, 0); add3(P.head, -6, 0, 0);
+    // fist pump
+    const up = trk(t, [[8, 0], [20, 1], [120, 1], [140, 0.2]]);
+    const s = Math.sin(t * 0.18) * 0.03;
+    P._r.hR = mix(P._r.hR, [0.30, 1.98 + s, 0.08], up); P._r.hL = mix(P._r.hL, [-0.24, 0.98, 0.14], up);
+    add3(P.spine, -8 * up, 12 * up, 0); add3(P.head, -12 * up, 0, 0); add3(P.hipsRot, 0, 8 * up, 0);
+    P.shR[1] += 0.06 * up; P.fist = [0.95, 0.95]; P.elbowPole = mix(P.elbowPole, [0.4, 0.3, -0.5], up);
+    C.face.mouth = 0.8 * pulse(t, 14, 44); C.face.brow = 0.6 * (1 - up) + 0.1;
   }
   C.mark(P);
   return P;
@@ -450,13 +537,19 @@ export function winPose(C, P) {
 
 export function losePose(C, P) {
   const t = tf(C, C.f.stT);
-  const k = cl01(t / 30);
   stand(C, P);
-  P.hips[1] = 0.9 - 0.4 * easeOut(k);
-  add3(P.spine, 30 * k, 0, 0); add3(P.head, 25 * k, 0, 0);
-  P._r.hL = [-0.2, 0.55, 0.1]; P._r.hR = [0.2, 0.55, 0.1];
-  P._r.fL = [-0.2, 0, 0.2]; P._r.fR = [0.2, 0, -0.1];
-  P.kneePole = [0.2, 0, 1];
+  const slump = trk(t, [[0, 0], [14, 1]]);
+  const kneel = trk(t, [[10, 0], [42, 1]]);
+  const down = trk(t, [[34, 0], [70, 1]]);
+  P.hips[1] = 0.9 - 0.52 * kneel; add3(P.spine, 14 * slump + 22 * down, 0, 0); add3(P.head, 18 * slump + 14 * down, 0, 0);
+  P.hips[2] -= 0.08 * kneel;
+  P._r.hL = mix([-0.24, 0.9, 0.18], [-0.30, 0.04, 0.46], down); P._r.hR = mix([0.24, 0.9, 0.18], [0.30, 0.04, 0.42], down);
+  P._r.hL = mix(P._r.hL, [-0.22, 0.8, 0.12], 1 - slump); P._r.hR = mix(P._r.hR, [0.22, 0.8, 0.12], 1 - slump);
+  P._r.fL = mix(P._r.fL, [-0.22, 0, 0.34], kneel); P._r.fR = mix(P._r.fR, [0.20, 0.02, -0.34], kneel);
+  P.footR[0] += 60 * kneel; P.toe[1] += 20 * kneel;
+  P.kneePole = [0.2, 0, 1]; P.fist = [0.3, 0.3]; P.shL[1] -= 0.03 * slump; P.shR[1] -= 0.03 * slump;
+  C.gait.mode = 'lock'; C.gait.settle = 0.5;
+  C.face.brow = -0.9; C.face.squint = 0.35; C.face.mouth = 0.12;
   C.mark(P);
   return P;
 }

@@ -679,7 +679,11 @@ export class Rig {
   }
 
   // sample points of a foot in ANKLE-local space (heel, ball, toe tip) - used by tests
-  footPoints() { return [[0, -ANKLE_H, -0.06], [0, -ANKLE_H, BALL_Z], [0, -ANKLE_H, BALL_Z + 0.09]]; }
+  footPoints(side = 0) {
+    const tb = this.feet[side === 1 || side === 'R' ? 'R' : 'L'];
+    const a = tb ? -tb.toe.rotation.x : 0, hy = -ANKLE_H + 0.03, hz = BALL_Z;
+    return [[0, -ANKLE_H, -0.065], [0, -ANKLE_H, BALL_Z], [0, hy - 0.02 * Math.cos(a) + 0.08 * Math.sin(a), hz + 0.08 * Math.cos(a) + 0.02 * Math.sin(a)]];
+  }
 
   // colour / glow tinting (hit flash, heat, rage)
   tint(color, amount) {

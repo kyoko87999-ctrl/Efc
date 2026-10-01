@@ -24,7 +24,7 @@ export class Reactor {
       headP: S(0.34, 0.26), headY: S(0.32, 0.26), headR: S(0.3, 0.3),
       hipsZ: S(0.2, 0.45), hipsX: S(0.2, 0.45), hipsY: S(0.3, 0.4),
       armZ: S(0.3, 0.28), armX: S(0.3, 0.28), armY: S(0.3, 0.3),
-      shoulder: S(0.34, 0.3),
+      shoulder: S(0.34, 0.3), squash: S(0.38, 0.4),
     };
     this.seq = 0;
     this.energy = 0;
@@ -55,8 +55,19 @@ export class Reactor {
     s.armX.kick(ps * 0.02 * m);
     s.armY.kick((high ? 0.02 : 0.012) * m);
     s.shoulder.kick(-0.01 * m);
+    s.squash.kick(-0.006 * m);
     this.energy = Math.min(2.5, this.energy + m);
   }
+
+  // the attacker's own body feels its strike connect: a short rock-back of the torso / shoulder girdle (never touches the striking arm)
+  recoil(hit, heavy, pf) {
+    const s = this.s, m = (hit ? 1 : 0.6) * (heavy ? 1.4 : 1) / Math.sqrt(this.mass);
+    s.spine.kick(-1.4 * m); s.headP.kick(-2.2 * m); s.shoulder.kick(-0.008 * m); s.hipsZ.kick(-0.004 * m * (pf || 1));
+    this.energy = Math.min(2.5, this.energy + 0.3 * m);
+  }
+
+  // squash & stretch impulse (landing, take-off, big impacts); + stretches
+  kickSquash(v) { this.s.squash.kick(v); this.energy = Math.min(2.5, this.energy + Math.abs(v) * 8); }
 
   step(dtF) {
     if (dtF <= 0) return;
@@ -65,15 +76,16 @@ export class Reactor {
   }
 
   // add the spring offsets to a pose (w scales the whole effect)
-  apply(P, w = 1) {
+  apply(P, w = 1, skipHands = null) {
     const s = this.s;
     P.spine[0] += s.spine.x * w; P.spine[1] += s.spineYaw.x * w; P.spine[2] += s.roll.x * w;
     P.headAdd[0] += s.headP.x * w; P.headAdd[1] += s.headY.x * w; P.headAdd[2] += s.headR.x * w;
     P.hips[2] += s.hipsZ.x * w; P.hips[0] += s.hipsX.x * w; P.hips[1] += s.hipsY.x * w;
     P.shL[1] += s.shoulder.x * w; P.shR[1] += s.shoulder.x * w;
+    P.squash += s.squash.x * w;
     for (const k of ['hL', 'hR']) {
       const r = P._r[k];
-      if (r) { r[0] += s.armX.x * w; r[1] += s.armY.x * w; r[2] += s.armZ.x * w; }
+      if (r && !(skipHands && skipHands[k])) { r[0] += s.armX.x * w; r[1] += s.armY.x * w; r[2] += s.armZ.x * w; }
     }
   }
 }

@@ -21,4 +21,4 @@ for (const id of ids.split(',')) {
 }
 const spec = { chars: [aid, did], view: opt.view || 'two', d: +(opt.d || 3.4), fov: +(opt.fov || 30), dist: 6, ops };
 const out = `${S}/${opt.out || 'rx_' + aid}`;
-execFileSync('node', ['tools/animlab.mjs', JSON.stringify(spec), `--out=${out}`, `--cols=${n}`, `--w=${opt.w || 230}`, `--h=${opt.h || 300}`], { stdio: 'inherit' });
+execFileSync('node', ['tools/animlab.mjs', JSON.stringify(spec), `--out=${out}`, `--cols=${opt.cols || n}`, `--w=${opt.w || 230}`, `--h=${opt.h || 300}`], { stdio: 'inherit' });

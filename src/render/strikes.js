@@ -104,7 +104,7 @@ function restFoot(S) {
 // ------------------------------------------------------------------------------------------------ body models
 function pivotFoot(P, side, yaw, heel) {
   const foot = side === 'L' ? P.footL : P.footR;
-  foot[1] += yaw; foot[0] += heel; P.toe[side === 'L' ? 0 : 1] += heel * 0.4;
+  foot[1] += yaw; foot[0] += heel; P.toe[side === 'L' ? 0 : 1] += heel;       // toes bend up so they stay flat on the floor
 }
 
 function punchModel(S, p) {
