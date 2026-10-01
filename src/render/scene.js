@@ -53,6 +53,9 @@ export class FighterView {
     this.auraT = 0;
     this.glow = ch.body.glow ? new THREE.Color(ch.body.glow) : new THREE.Color(0xffffff);
     this.lastHit = 0;
+    // speed streaks (dashes, launches): ribbons behind the torso
+    this.spd = [new Trail(gv.scene, this.glow, 9), new Trail(gv.scene, this.glow, 9)];
+    this.lastPos = null; this.up = new V3(0, 1, 0);
   }
 
   trail(limb) {
@@ -65,6 +68,21 @@ export class FighterView {
     this.puppet.update(alpha, T, dtF, freeze);
     if (this.anim.footfalls.length && this.gv.onStep) for (const ff of this.anim.footfalls) this.gv.onStep(f.idx, ff.power);
     const { x, z } = this.puppet.pos;
+    // speed streaks
+    {
+      const P = this.puppet.pos, st = f.state;
+      let v = 0;
+      if (this.lastPos && dtF > 0) v = Math.hypot(P.x - this.lastPos[0], P.y - this.lastPos[1], P.z - this.lastPos[2]) / dtF;
+      this.lastPos = [P.x, P.y, P.z];
+      const fast = (st === ST.DASHF || st === ST.DASHB || st === ST.AIR || st === ST.SS) && v > (st === ST.AIR ? 0.1 : 0.075) && !freeze;
+      if (fast) {
+        const c = f.rage ? 0xff5a4a : f.heat.on ? 0xffa850 : 0xcfe8ff;
+        rig.anchorWorld('chest', this.tmp); this.spd[0].setColor(c); this.spd[0].push(this.tmp, this.up, 0.2 * f.sc);
+        rig.anchorWorld('pelvis', this.tmp); this.spd[1].setColor(c); this.spd[1].push(this.tmp, this.up, 0.16 * f.sc);
+      }
+      for (const t of this.spd) t.update(fast);
+    }
+
     // colour effects
     let tintC = null, tintA = 0;
     if (f.flash > 0) { tintC = '#ffffff'; tintA = f.flash / 6 * 0.7; }
@@ -106,6 +124,7 @@ export class FighterView {
     this.gv.scene.remove(this.rig.root);
     this.rig.dispose();
     for (const t of Object.values(this.trails)) t.dispose();
+    for (const t of this.spd) t.dispose();
   }
 }
 
